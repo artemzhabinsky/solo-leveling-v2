@@ -1,0 +1,201 @@
+/* Global Resets & Base Styling */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(0, 119, 255, 0.15) 0%, transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+}
+
+/* Custom Hologram Background Scanlines */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 240, 255, 0.015),
+    rgba(0, 240, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(5, 10, 21, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.7);
+  box-shadow: 0 0 10px var(--system-blue);
+}
+
+/* Typography Utilities */
+.font-system {
+  font-family: var(--font-system);
+  letter-spacing: 1.5px;
+}
+
+.text-glow {
+  text-shadow: 0 0 10px var(--system-blue);
+}
+.text-gold-glow {
+  text-shadow: 0 0 10px var(--system-gold);
+}
+.text-purple-glow {
+  text-shadow: 0 0 10px var(--system-purple);
+}
+
+/* Layout Containers */
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Buttons Base */
+.btn-system {
+  font-family: var(--font-system);
+  background: rgba(0, 240, 255, 0.08);
+  border: var(--border-system);
+  color: var(--system-blue);
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+}
+
+.btn-system:hover {
+  background: rgba(0, 240, 255, 0.25);
+  box-shadow: var(--shadow-neon);
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+.btn-system:active {
+  transform: translateY(0);
+}
+
+.btn-gold {
+  background: rgba(255, 215, 0, 0.1);
+  border: var(--border-gold);
+  color: var(--system-gold);
+}
+.btn-gold:hover {
+  background: rgba(255, 215, 0, 0.25);
+  box-shadow: var(--shadow-gold);
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: rgba(255, 42, 95, 0.1);
+  border: 1px solid rgba(255, 42, 95, 0.4);
+  color: var(--system-crimson);
+}
+.btn-danger:hover {
+  background: rgba(255, 42, 95, 0.25);
+  box-shadow: 0 0 15px rgba(255, 42, 95, 0.4);
+  color: #ffffff;
+}
+
+/* Form Inputs */
+.input-system, .select-system, .textarea-system {
+  width: 100%;
+  background: rgba(5, 12, 28, 0.8);
+  border: var(--border-system);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.input-system:focus, .select-system:focus, .textarea-system:focus {
+  border-color: var(--system-blue);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+}
+
+.select-system option {
+  background-color: var(--bg-secondary);
+  color: var(--text-main);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(3, 7, 18, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 35px rgba(0, 240, 255, 0.25), inset 0 0 20px rgba(0, 240, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  transform: scale(0.95) translateY(10px);
+  transition: transform var(--transition-slow);
+}
+
+.modal-overlay.active .modal-content {
+  transform: scale(1) translateY(0);
+}

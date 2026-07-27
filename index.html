@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solo Leveling System — Игровой Трекер Задач & Магазин Наград</title>
+  
+  <!-- Google Fonts: Orbitron, Rajdhani, Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Application Stylesheets -->
+  <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/system-ui.css">
+  <link rel="stylesheet" href="styles/task-tracker.css">
+  <link rel="stylesheet" href="styles/shop.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- TOP SYSTEM HEADER & PLAYER STATUS BAR -->
+    <header class="system-header">
+      <div class="player-identity">
+        <div id="header-rank-badge" class="rank-badge rank-E">E-RANK</div>
+        <div class="player-info-meta">
+          <div id="header-player-name" class="player-name">Сон Джин-Ву</div>
+          <div id="header-player-title" class="player-title">Новичок E-Ранга</div>
+        </div>
+      </div>
+
+      <!-- XP & Level Progress -->
+      <div class="level-xp-container">
+        <div class="level-meta">
+          <span>УРОВЕНЬ: <span id="header-level-num" class="level-number">1</span></span>
+          <span id="header-xp-text" style="color: var(--text-muted);">0 / 100 XP (0%)</span>
+        </div>
+        <div class="xp-bar-bg">
+          <div id="header-xp-fill" class="xp-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Gold Balance & Status Button -->
+      <div class="stats-summary">
+        <div class="currency-badge">
+          <span>🪙</span>
+          <span id="header-gold-text">150</span>
+        </div>
+        <button id="btn-open-status" class="btn-system stat-points-indicator">
+          📊 СТАТУС
+        </button>
+      </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="system-nav-tabs">
+      <button class="nav-tab-btn active" data-tab="tasks">⚔️ ВСЕ ЗАДАЧИ</button>
+      <button class="nav-tab-btn" data-tab="daily">🔥 ЕЖЕДНЕВНЫЕ КВЕСТЫ</button>
+      <button class="nav-tab-btn" data-tab="shop">🛍️ МАГАЗИН НАГРАД ("ХОТЕЛКИ")</button>
+      <button class="nav-tab-btn" data-tab="inventory">📦 КУПЛЕННЫЕ НАГРАДЫ</button>
+    </nav>
+
+    <!-- TAB 1: MAIN TASK TRACKER SECTION -->
+    <section id="section-tasks" class="tab-content-section">
+      <div class="task-controls-bar">
+        <button id="btn-open-new-task" class="btn-system">
+          <span>➕</span> НОВАЯ ЗАДАЧА
+        </button>
+
+        <div class="view-switcher">
+          <button class="view-btn active" data-view="list">📋 Список</button>
+          <button class="view-btn" data-view="kanban">📌 Доска Канбан</button>
+          <button class="view-btn" data-view="calendar">📅 Календарь</button>
+        </div>
+
+        <div class="filter-group">
+          <select id="filter-category" class="select-system" style="width: auto;">
+            <option value="all">Все Категории</option>
+          </select>
+          <select id="filter-priority" class="select-system" style="width: auto;">
+            <option value="all">Все Ранги Приоритета</option>
+            <option value="S">S-Rank (Мажор / Босс)</option>
+            <option value="A">A-Rank (Важные)</option>
+            <option value="B">B-Rank (Высокие)</option>
+            <option value="C">C-Rank (Средние)</option>
+            <option value="D">D-Rank (Обычные)</option>
+            <option value="E">E-Rank (Легкие)</option>
+          </select>
+          <input type="text" id="input-task-search" class="input-system" placeholder="Поиск задач..." style="width: 180px;">
+        </div>
+      </div>
+
+      <!-- VIEW 1: LIST VIEW -->
+      <div id="tasks-view-list" class="tasks-list-container" style="margin-top: 16px;">
+        <!-- Dynamic Task Cards Render Here -->
+      </div>
+
+      <!-- VIEW 2: KANBAN BOARD VIEW -->
+      <div id="tasks-view-kanban" class="kanban-board-grid" style="display: none; margin-top: 16px;">
+        <div class="kanban-column">
+          <div class="kanban-column-header">
+            <span>📝 К ИСПОЛНЕНИЮ</span>
+          </div>
+          <div id="kanban-col-todo" class="kanban-cards-container" data-status="todo"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="kanban-column-header">
+            <span>⚡ В ПРОЦЕССЕ</span>
+          </div>
+          <div id="kanban-col-in_progress" class="kanban-cards-container" data-status="in_progress"></div>
+        </div>
+        <div class="kanban-column">
+          <div class="kanban-column-header">
+            <span>✅ ВЫПОЛНЕНО</span>
+          </div>
+          <div id="kanban-col-completed" class="kanban-cards-container" data-status="completed"></div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: CALENDAR VIEW -->
+      <div id="tasks-view-calendar" class="calendar-view-container" style="display: none; margin-top: 16px;">
+        <div class="calendar-header">
+          <h3 class="font-system text-glow">КАЛЕНДАРЬ КВЕСТОВ НА МЕСЯЦ</h3>
+        </div>
+        <div id="calendar-grid-days" class="calendar-grid">
+          <!-- Calendar Days Render Here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: DAILY QUESTS LOG SECTION -->
+    <section id="section-daily" class="tab-content-section" style="display: none;">
+      <div class="daily-quest-panel">
+        <div class="daily-quest-header">
+          <div>
+            <div class="daily-quest-title">🔥 ЕЖЕДНЕВНЫЙ КВЕСТ: ПОДГОТОВКА СТАТЬ СИЛЬНЕЕ</div>
+            <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+              Выполняйте ежедневный комплекс тренировок для поддержания формы и развития дисциплины.
+            </div>
+          </div>
+          <div class="streak-badge">
+            ⚡ СЕРИЯ: <span id="daily-streak-num">3</span> ДНЕЙ
+          </div>
+        </div>
+        <div id="daily-quests-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+          <!-- Daily Quests Render Here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: REWARD SHOP SECTION -->
+    <section id="section-shop" class="tab-content-section" style="display: none;">
+      <div class="shop-header-banner">
+        <div class="shop-title-meta">
+          <h2>🛍️ МАГАЗИН ВНУТРЕННИХ НАГРАД ("ХОТЕЛКИ")</h2>
+          <p>Зарабатывайте золотые монеты за выполнение задач и обменивайте их на реальные радости и хотелки!</p>
+        </div>
+        <button id="btn-open-new-shop-item" class="btn-system btn-gold">
+          <span>➕</span> НОВАЯ НАГРАДА
+        </button>
+      </div>
+
+      <div id="shop-grid-items" class="shop-grid" style="margin-top: 20px;">
+        <!-- Shop Reward Items Render Here -->
+      </div>
+    </section>
+
+    <!-- TAB 4: PURCHASED INVENTORY SECTION -->
+    <section id="section-inventory" class="tab-content-section" style="display: none;">
+      <div class="daily-quest-panel" style="border-color: var(--system-gold);">
+        <div class="daily-quest-header">
+          <div class="daily-quest-title" style="color: var(--system-gold);">📦 КУПЛЕННЫЕ НАГРАДЫ И ИНВЕНТАРЬ</div>
+        </div>
+        <div id="inventory-list-container" class="inventory-list-container" style="margin-top: 10px;">
+          <!-- Purchased items render here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTTOM TOOLBAR (IMPORT/EXPORT & UTILITIES) -->
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0, 240, 255, 0.15); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; gap: 10px;">
+        <button id="btn-export-json" class="btn-system" style="padding: 6px 12px; font-size: 11px;">💾 Экспорт JSON</button>
+        <button id="btn-import-json" class="btn-system" style="padding: 6px 12px; font-size: 11px;">📥 Импорт JSON</button>
+        <input type="file" id="file-import-json" accept=".json" style="display: none;">
+        <button id="btn-reset-data" class="btn-system btn-danger" style="padding: 6px 12px; font-size: 11px;">🔄 Сбросить Прогресс</button>
+      </div>
+
+      <div>
+        <button id="btn-toggle-sound" class="btn-system" style="padding: 6px 12px; font-size: 11px;">🔊 ЗВУК: ВКЛ</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- MODAL 1: PLAYER STATUS WINDOW -->
+  <div id="status-modal-overlay" class="modal-overlay">
+    <div class="modal-content" style="max-width: 650px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding-bottom: 12px; margin-bottom: 16px;">
+        <h2 class="font-system text-glow" style="color: var(--system-blue); font-size: 20px;">📊 ОКНО СТАТУСА ПЕРСОНАЖА</h2>
+        <button id="btn-close-status" style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="margin-bottom: 16px; background: rgba(0,240,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,240,255,0.2);">
+        <div style="font-family: var(--font-system); color: var(--system-blue);">ЗВАНИЕ: <span id="status-modal-rank" style="color: var(--system-gold);">E</span> — <span id="status-modal-title">Новичок E-Ранга</span></div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+          Свободных очков характеристик: <strong id="status-modal-points" style="color: var(--system-gold); font-size: 16px;">0</strong>
+        </div>
+      </div>
+
+      <div class="status-window">
+        <!-- Strength -->
+        <div class="status-attribute-card">
+          <div class="stat-name-box">
+            <span class="stat-name">СИЛА (STR)</span>
+            <span id="stat-perk-strength" class="stat-desc">+0% к Золоту</span>
+          </div>
+          <div class="stat-value-box">
+            <span id="stat-val-strength" class="stat-value">10</span>
+            <button id="btn-add-strength" class="btn-add-stat">+</button>
+          </div>
+        </div>
+
+        <!-- Agility -->
+        <div class="status-attribute-card">
+          <div class="stat-name-box">
+            <span class="stat-name">ЛОВКОСТЬ (AGI)</span>
+            <span id="stat-perk-agility" class="stat-desc">+0% Скоростной XP</span>
+          </div>
+          <div class="stat-value-box">
+            <span id="stat-val-agility" class="stat-value">10</span>
+            <button id="btn-add-agility" class="btn-add-stat">+</button>
+          </div>
+        </div>
+
+        <!-- Sense -->
+        <div class="status-attribute-card">
+          <div class="stat-name-box">
+            <span class="stat-name">ВОСПРИЯТИЕ (SEN)</span>
+            <span id="stat-perk-sense" class="stat-desc">0% Крит двойная награда</span>
+          </div>
+          <div class="stat-value-box">
+            <span id="stat-val-sense" class="stat-value">10</span>
+            <button id="btn-add-sense" class="btn-add-stat">+</button>
+          </div>
+        </div>
+
+        <!-- Intelligence -->
+        <div class="status-attribute-card">
+          <div class="stat-name-box">
+            <span class="stat-name">ИНТЕЛЛЕКТ (INT)</span>
+            <span id="stat-perk-intelligence" class="stat-desc">+0% Множитель XP</span>
+          </div>
+          <div class="stat-value-box">
+            <span id="stat-val-intelligence" class="stat-value">10</span>
+            <button id="btn-add-intelligence" class="btn-add-stat">+</button>
+          </div>
+        </div>
+
+        <!-- Vitality -->
+        <div class="status-attribute-card" style="grid-column: 1 / -1;">
+          <div class="stat-name-box">
+            <span class="stat-name">ВЫНОСЛИВОСТЬ (VIT)</span>
+            <span id="stat-perk-vitality" class="stat-desc">Защита серий квестов</span>
+          </div>
+          <div class="stat-value-box">
+            <span id="stat-val-vitality" class="stat-value">10</span>
+            <button id="btn-add-vitality" class="btn-add-stat">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CREATE NEW TASK -->
+  <div id="task-modal-overlay" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding-bottom: 12px; margin-bottom: 16px;">
+        <h2 class="font-system text-glow" style="color: var(--system-blue); font-size: 18px;">➕ ПРИНЯТЬ НОВЫЙ КВЕСТ / ЗАДАЧУ</h2>
+        <button id="btn-close-task-modal" style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="form-create-task" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 12px; color: var(--system-blue); font-family: var(--font-system);">НАЗВАНИЕ КВЕСТА</label>
+          <input type="text" id="task-input-title" class="input-system" placeholder="Например: Закончить модуль авторизации..." required style="margin-top: 4px;">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--system-blue); font-family: var(--font-system);">ОПИСАНИЕ / ДЕТАЛИ (ОПЦИОНАЛЬНО)</label>
+          <textarea id="task-input-desc" class="textarea-system" rows="3" placeholder="Подробное описание того, что нужно сделать..." style="margin-top: 4px;"></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size: 12px; color: var(--system-blue); font-family: var(--font-system);">КАТЕГОРИЯ</label>
+            <select id="task-select-category" class="select-system" style="margin-top: 4px;"></select>
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--system-blue); font-family: var(--font-system);">РАНГ ПРИОРИТЕТА</label>
+            <select id="task-select-priority" class="select-system" style="margin-top: 4px;">
+              <option value="C">C-Rank (Стандарт - 200 XP, 100 🪙)</option>
+              <option value="E">E-Rank (Легкий - 50 XP, 25 🪙)</option>
+              <option value="D">D-Rank (Обычный - 100 XP, 50 🪙)</option>
+              <option value="B">B-Rank (Высокий - 400 XP, 200 🪙)</option>
+              <option value="A">A-Rank (Срочный - 800 XP, 450 🪙)</option>
+              <option value="S">S-Rank (Босс Квест - 1500 XP, 1000 🪙)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--system-blue); font-family: var(--font-system);">СРОК ВЫПОЛНЕНИЯ (DUE DATE)</label>
+          <input type="date" id="task-input-date" class="input-system" style="margin-top: 4px;">
+        </div>
+
+        <button type="submit" class="btn-system" style="margin-top: 10px; width: 100%; justify-content: center;">
+          ⚡ ДОБАВИТЬ В ЖУРНАЛ КВЕСТОВ
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CREATE NEW SHOP REWARD ITEM -->
+  <div id="shop-modal-overlay" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 215, 0, 0.3); padding-bottom: 12px; margin-bottom: 16px;">
+        <h2 class="font-system text-gold-glow" style="color: var(--system-gold); font-size: 18px;">🎁 ДОБАВИТЬ СВОЮ ХОТЕЛКУ В МАГАЗИН</h2>
+        <button id="btn-close-shop-modal" style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="form-create-shop-item" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 12px; color: var(--system-gold); font-family: var(--font-system);">НАЗВАНИЕ НАГРАДЫ / ХОТЕЛКИ</label>
+          <input type="text" id="shop-input-title" class="input-system" placeholder="Например: Поиграть в PS5 2 часа..." required style="margin-top: 4px;">
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--system-gold); font-family: var(--font-system);">ОПИСАНИЕ</label>
+          <input type="text" id="shop-input-desc" class="input-system" placeholder="Краткое описание вашей награды..." style="margin-top: 4px;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size: 12px; color: var(--system-gold); font-family: var(--font-system);">СТОИМОСТЬ (ЗОЛОТЫЕ МОНЕТЫ 🪙)</label>
+            <input type="number" id="shop-input-price" class="input-system" placeholder="150" min="10" required style="margin-top: 4px;">
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--system-gold); font-family: var(--font-system);">ИКОНКА (EMOJI)</label>
+            <input type="text" id="shop-input-icon" class="input-system" placeholder="🎮" style="margin-top: 4px;">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-system btn-gold" style="margin-top: 10px; width: 100%; justify-content: center;">
+          🛍️ ДОБАВИТЬ В МАГАЗИН
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: LEVEL UP ANIMATED POPUP -->
+  <div id="levelup-modal-overlay" class="modal-overlay">
+    <div class="modal-content" style="text-align: center; border-color: var(--system-blue); box-shadow: 0 0 50px var(--system-blue);">
+      <div style="font-size: 48px; margin-bottom: 8px;">⚔️</div>
+      <h1 class="font-system text-glow" style="color: var(--system-blue); font-size: 28px; letter-spacing: 3px;">СИСТЕМА: LEVEL UP!</h1>
+      <div id="levelup-modal-level" class="font-system" style="font-size: 22px; color: #ffffff; margin-top: 10px; font-weight: 900;">УРОВЕНЬ 2</div>
+      <div id="levelup-modal-points" style="color: var(--system-gold); font-family: var(--font-system); margin-top: 8px; font-size: 16px;">+5 Очков Характеристик</div>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 14px; line-height: 1.5;">
+        Вы стали сильнее! Перейдите в Окно Статуса, чтобы распределить полученные очки характеристик между Силой, Ловкостью, Восприятием, Выносливостью и Интеллектом.
+      </p>
+      <button id="btn-close-levelup" class="btn-system" style="margin-top: 20px; width: 100%; justify-content: center;">
+        ПРИНЯТЬ
+      </button>
+    </div>
+  </div>
+
+  <!-- SYSTEM NOTIFICATIONS TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- Main JavaScript ES Module -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

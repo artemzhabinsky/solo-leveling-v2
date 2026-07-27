@@ -1,0 +1,297 @@
+/* Task Tracker Views & Components */
+
+/* Controls Header */
+.task-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--bg-card);
+  border: var(--border-system);
+  padding: 14px 20px;
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+}
+
+.view-switcher {
+  display: flex;
+  background: rgba(5, 12, 28, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+
+.view-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  font-family: var(--font-system);
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+
+.view-btn.active {
+  background: rgba(0, 240, 255, 0.2);
+  color: var(--system-blue);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* LIST VIEW */
+.tasks-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task-item-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.task-item-card:hover {
+  border-color: var(--system-blue);
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-neon);
+  transform: translateX(4px);
+}
+
+.task-item-card.completed {
+  opacity: 0.6;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(5, 10, 20, 0.5);
+}
+
+.task-item-card.completed .task-title {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+.task-checkbox-custom {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--system-blue);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.task-item-card.completed .task-checkbox-custom {
+  background: var(--system-blue);
+  box-shadow: 0 0 10px var(--system-blue);
+}
+
+.task-content-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
+
+.task-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.task-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.category-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(0, 240, 255, 0.1);
+  color: var(--system-blue);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.rewards-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-family: var(--font-system);
+  font-size: 12px;
+}
+
+.xp-gain { color: var(--system-blue); font-weight: 700; }
+.gold-gain { color: var(--system-gold); font-weight: 700; }
+
+/* KANBAN VIEW */
+.kanban-board-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .kanban-board-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kanban-column {
+  background: rgba(8, 16, 36, 0.6);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 500px;
+}
+
+.kanban-column-header {
+  font-family: var(--font-system);
+  font-size: 14px;
+  color: var(--system-blue);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+}
+
+.kanban-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+/* CALENDAR VIEW */
+.calendar-view-container {
+  background: var(--bg-card);
+  border: var(--border-system);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-family: var(--font-system);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calendar-day-head {
+  text-align: center;
+  font-family: var(--font-system);
+  font-size: 12px;
+  color: var(--system-blue);
+  padding: 8px;
+}
+
+.calendar-day-cell {
+  background: rgba(5, 12, 28, 0.7);
+  border: 1px solid rgba(0, 240, 255, 0.1);
+  min-height: 80px;
+  border-radius: var(--radius-md);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-day-cell.today {
+  border-color: var(--system-blue);
+  box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.calendar-day-num {
+  font-family: var(--font-system);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.calendar-task-dot {
+  font-size: 10px;
+  padding: 2px 4px;
+  background: rgba(0, 240, 255, 0.15);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* DAILY QUEST SECTION */
+.daily-quest-panel {
+  background: linear-gradient(135deg, rgba(10, 20, 45, 0.9), rgba(5, 10, 25, 0.95));
+  border: 1px solid var(--system-purple);
+  box-shadow: 0 0 25px rgba(138, 43, 226, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.daily-quest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+  padding-bottom: 12px;
+}
+
+.daily-quest-title {
+  font-family: var(--font-system);
+  font-size: 18px;
+  color: #d094ff;
+  letter-spacing: 1.5px;
+}
+
+.streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 42, 95, 0.15);
+  border: 1px solid var(--system-crimson);
+  color: var(--system-crimson);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: var(--font-system);
+  font-size: 13px;
+  font-weight: 700;
+}

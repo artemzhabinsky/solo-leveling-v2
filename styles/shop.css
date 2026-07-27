@@ -1,0 +1,158 @@
+/* Reward Shop ("Хотелки") & Inventory Styles */
+
+.shop-header-banner {
+  background: linear-gradient(135deg, rgba(20, 15, 40, 0.9), rgba(10, 25, 45, 0.9));
+  border: var(--border-gold);
+  box-shadow: var(--shadow-gold);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.shop-title-meta h2 {
+  font-family: var(--font-system);
+  color: var(--system-gold);
+  font-size: 22px;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.shop-title-meta p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.shop-item-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.shop-item-card:hover {
+  border-color: var(--system-gold);
+  box-shadow: var(--shadow-gold);
+  transform: translateY(-4px);
+  background: rgba(25, 35, 65, 0.85);
+}
+
+.item-icon-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.item-description {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.item-price-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-system);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--system-gold);
+}
+
+.item-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-buy-reward {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 215, 0, 0.15);
+  border: var(--border-gold);
+  color: var(--system-gold);
+  border-radius: var(--radius-md);
+  font-family: var(--font-system);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-buy-reward:hover:not(:disabled) {
+  background: var(--system-gold);
+  color: #000000;
+  box-shadow: var(--shadow-gold);
+}
+
+.btn-buy-reward:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: rgba(255, 215, 0, 0.15);
+}
+
+/* Purchased Inventory List */
+.inventory-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inventory-item-row {
+  background: rgba(5, 12, 28, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inventory-item-title {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.inventory-item-date {
+  font-size: 12px;
+  color: var(--text-dim);
+}
