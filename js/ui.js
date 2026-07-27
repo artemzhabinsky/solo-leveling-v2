@@ -6,7 +6,7 @@ import { sound } from './sound.js';
 
 export class UIManager {
   constructor() {
-    this.activeTab = 'tasks'; // 'tasks', 'daily', 'shop', 'inventory'
+    this.activeTab = 'tasks'; // 'tasks', 'character', 'daily', 'shop', 'inventory'
     this.activeView = 'list'; // 'list', 'kanban', 'calendar'
   }
 
@@ -18,14 +18,20 @@ export class UIManager {
   renderAll() {
     this.renderHeader();
     this.renderStatusModal();
+    this.renderCharacterChamber();
   }
 
-  // Render Header Player Stats
+  // Render Header Player Stats & Avatar
   renderHeader() {
     const player = store.data.player;
     const reqXp = SystemState.getRequiredXP(player.level);
     const rankInfo = SystemState.getRankInfo(player.level);
+    const evoInfo = SystemState.getAvatarEvolution(player.level);
     const xpPercent = Math.min(100, Math.round((player.xp / reqXp) * 100));
+
+    // Avatar Thumbnail in Header
+    const avatarImgEl = document.getElementById('header-avatar-img');
+    if (avatarImgEl) avatarImgEl.src = evoInfo.currentTier.image;
 
     // Rank Badge
     const rankBadgeEl = document.getElementById('header-rank-badge');
@@ -39,7 +45,7 @@ export class UIManager {
     if (playerNameEl) playerNameEl.textContent = player.name;
 
     const playerTitleEl = document.getElementById('header-player-title');
-    if (playerTitleEl) playerTitleEl.textContent = rankInfo.title;
+    if (playerTitleEl) playerTitleEl.textContent = evoInfo.currentTier.name;
 
     // Level & XP Bar
     const levelNumEl = document.getElementById('header-level-num');
@@ -104,6 +110,52 @@ export class UIManager {
     }
   }
 
+  // Render Character Evolution Chamber Tab
+  renderCharacterChamber() {
+    const player = store.data.player;
+    const evoInfo = SystemState.getAvatarEvolution(player.level);
+
+    // Active Card
+    const cardImg = document.getElementById('char-hero-image');
+    if (cardImg) cardImg.src = evoInfo.currentTier.image;
+
+    const cardTitle = document.getElementById('char-hero-title');
+    if (cardTitle) cardTitle.textContent = evoInfo.currentTier.name;
+
+    const cardRace = document.getElementById('char-hero-race');
+    if (cardRace) cardRace.textContent = evoInfo.currentTier.race;
+
+    const cardDesc = document.getElementById('char-hero-desc');
+    if (cardDesc) cardDesc.textContent = evoInfo.currentTier.description;
+
+    const nameInput = document.getElementById('char-name-input');
+    if (nameInput) nameInput.value = player.name;
+
+    // Render Evolution Tree Timeline
+    const treeContainer = document.getElementById('char-evolution-tree');
+    if (!treeContainer) return;
+
+    treeContainer.innerHTML = evoInfo.allTiers.map(tier => {
+      const isCurrent = tier.tier === evoInfo.currentTier.tier;
+      const isUnlocked = player.level >= tier.minLevel;
+
+      return `
+        <div class="evolution-stage-row ${isCurrent ? 'active' : (isUnlocked ? '' : 'locked')}">
+          <div class="stage-thumb-wrapper">
+            <img src="${tier.image}" class="stage-thumb-img" alt="${tier.name}">
+          </div>
+          <div class="stage-info">
+            <div class="stage-title">${isUnlocked ? tier.name : '🔒 Заблокированная форма'}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">${tier.race}</div>
+            <div class="stage-req">
+              ${isCurrent ? '⭐ ТЕКУЩАЯ ФОРМА (Уровень ' + player.level + ')' : (isUnlocked ? '✓ РАЗБЛОКИРОВАНО' : '🔒 ТРЕБУЕТСЯ ' + tier.minLevel + ' УРОВЕНЬ')}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   // Show Toast Notification
   showToast(title, message, isCrit = false) {
     const container = document.getElementById('toast-container');
@@ -142,8 +194,10 @@ export class UIManager {
     const overlay = document.getElementById('levelup-modal-overlay');
     if (!overlay) return;
 
+    const evoInfo = SystemState.getAvatarEvolution(newLevel);
+
     const levelText = document.getElementById('levelup-modal-level');
-    if (levelText) levelText.textContent = `УРОВЕНЬ ${newLevel}`;
+    if (levelText) levelText.textContent = `УРОВЕНЬ ${newLevel} — ${evoInfo.currentTier.name}`;
 
     const pointsText = document.getElementById('levelup-modal-points');
     if (pointsText) pointsText.textContent = `+${statPointsGained} Очков Характеристик`;
@@ -151,7 +205,7 @@ export class UIManager {
     overlay.classList.add('active');
   }
 
-  // Simple Canvas Particle Firework / Confetti Effect
+  // Particle Confetti Effect
   triggerConfetti() {
     const canvas = document.createElement('canvas');
     canvas.style.position = 'fixed';
@@ -242,6 +296,28 @@ export class UIManager {
       }
     });
 
+    // Save Name Input in Character Chamber
+    const nameBtn = document.getElementById('btn-save-char-name');
+    if (nameBtn) {
+      nameBtn.addEventListener('click', () => {
+        const input = document.getElementById('char-name-input');
+        if (input && input.value.trim()) {
+          store.setPlayerName(input.value.trim());
+          this.renderHeader();
+          this.showToast('ИМЯ ОБНОВЛЕНО ⚔️', `Ваше имя изменено на "${input.value.trim()}"!`);
+        }
+      });
+    }
+
+    // Avatar thumbnail click -> switch tab to Character
+    const headerAvatar = document.getElementById('header-avatar-frame');
+    if (headerAvatar) {
+      headerAvatar.addEventListener('click', () => {
+        const charTabBtn = document.querySelector('.nav-tab-btn[data-tab="character"]');
+        if (charTabBtn) charTabBtn.click();
+      });
+    }
+
     // Close Levelup Modal
     const btnCloseLevelup = document.getElementById('btn-close-levelup');
     const modalLevelup = document.getElementById('levelup-modal-overlay');
@@ -252,7 +328,7 @@ export class UIManager {
     // Navigation Tabs
     const tabBtns = document.querySelectorAll('.nav-tab-btn');
     tabBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         tabBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
@@ -271,6 +347,10 @@ export class UIManager {
     const targetSection = document.getElementById(`section-${tabName}`);
     if (targetSection) {
       targetSection.style.display = 'block';
+    }
+
+    if (tabName === 'character') {
+      this.renderCharacterChamber();
     }
   }
 }

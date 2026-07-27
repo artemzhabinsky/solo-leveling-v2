@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solo Leveling System — Игровой Трекер Задач & Магазин Наград</title>
+  <title>Solo Leveling System — Игровой Трекер Задач, Эволюция & Магазин</title>
   
   <!-- Google Fonts: Orbitron, Rajdhani, Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,10 +24,14 @@
     <!-- TOP SYSTEM HEADER & PLAYER STATUS BAR -->
     <header class="system-header">
       <div class="player-identity">
+        <!-- Circular Avatar Thumbnail -->
+        <div id="header-avatar-frame" class="header-avatar-frame" title="Нажмите, чтобы открыть профиль персонажа">
+          <img id="header-avatar-img" class="header-avatar-img" src="assets/avatars/tier_1.jpg" alt="Avatar">
+        </div>
         <div id="header-rank-badge" class="rank-badge rank-E">E-RANK</div>
         <div class="player-info-meta">
           <div id="header-player-name" class="player-name">Сон Джин-Ву</div>
-          <div id="header-player-title" class="player-title">Новичок E-Ранга</div>
+          <div id="header-player-title" class="player-title">Нищий Гоблин-Оборванец</div>
         </div>
       </div>
 
@@ -57,6 +61,7 @@
     <!-- NAVIGATION TABS -->
     <nav class="system-nav-tabs">
       <button class="nav-tab-btn active" data-tab="tasks">⚔️ ВСЕ ЗАДАЧИ</button>
+      <button class="nav-tab-btn" data-tab="character">👤 ПЕРСОНАЖ И ЭВОЛЮЦИЯ</button>
       <button class="nav-tab-btn" data-tab="daily">🔥 ЕЖЕДНЕВНЫЕ КВЕСТЫ</button>
       <button class="nav-tab-btn" data-tab="shop">🛍️ МАГАЗИН НАГРАД ("ХОТЕЛКИ")</button>
       <button class="nav-tab-btn" data-tab="inventory">📦 КУПЛЕННЫЕ НАГРАДЫ</button>
@@ -130,7 +135,49 @@
       </div>
     </section>
 
-    <!-- TAB 2: DAILY QUESTS LOG SECTION -->
+    <!-- TAB 2: CHARACTER PROFILE & EVOLUTION CHAMBER -->
+    <section id="section-character" class="tab-content-section" style="display: none;">
+      <div class="character-chamber-grid">
+        <!-- Hero Avatar Card -->
+        <div class="avatar-hero-card">
+          <div class="avatar-hero-image-wrapper">
+            <img id="char-hero-image" src="assets/avatars/tier_1.jpg" class="avatar-hero-img" alt="Hero Avatar">
+          </div>
+          <h2 id="char-hero-title" class="avatar-tier-title">Нищий Гоблин-Оборванец</h2>
+          <div id="char-hero-race" class="avatar-race-tag">Раса: Лесной Слакер E-Ранга</div>
+
+          <div style="margin-top: 16px; width: 100%;">
+            <label style="font-size: 11px; color: var(--system-blue); font-family: var(--font-system);">ИМЯ ПЕРСОНАЖА</label>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              <input type="text" id="char-name-input" class="input-system" value="Сон Джин-Ву">
+              <button id="btn-save-char-name" class="btn-system" style="padding: 8px 12px; font-size: 11px;">💾</button>
+            </div>
+          </div>
+
+          <p id="char-hero-desc" class="avatar-description">
+            Самое слабое существо в подземелье. Ходит в рванье с палкой и боится каждого шороха. Выполняйте задачи, чтобы перестать быть оборванцем!
+          </p>
+        </div>
+
+        <!-- Evolution Tree Timeline -->
+        <div class="daily-quest-panel">
+          <div class="daily-quest-header">
+            <div>
+              <div class="daily-quest-title" style="color: var(--system-blue);">🧬 ДЕРЕВО ЭВОЛЮЦИИ ПЕРСОНАЖА</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                С каждым новым уровнем ваш персонаж мутирует и становится сильнее: от слабого гоблина-оборванца до Ультимативного Теневого Гигачада!
+              </div>
+            </div>
+          </div>
+
+          <div id="char-evolution-tree" class="evolution-tree-container" style="margin-top: 10px;">
+            <!-- Dynamic Evolution Stages Render Here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DAILY QUESTS LOG SECTION -->
     <section id="section-daily" class="tab-content-section" style="display: none;">
       <div class="daily-quest-panel">
         <div class="daily-quest-header">
@@ -150,7 +197,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: REWARD SHOP SECTION -->
+    <!-- TAB 4: REWARD SHOP SECTION -->
     <section id="section-shop" class="tab-content-section" style="display: none;">
       <div class="shop-header-banner">
         <div class="shop-title-meta">
@@ -167,7 +214,7 @@
       </div>
     </section>
 
-    <!-- TAB 4: PURCHASED INVENTORY SECTION -->
+    <!-- TAB 5: PURCHASED INVENTORY SECTION -->
     <section id="section-inventory" class="tab-content-section" style="display: none;">
       <div class="daily-quest-panel" style="border-color: var(--system-gold);">
         <div class="daily-quest-header">

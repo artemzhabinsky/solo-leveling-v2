@@ -40,11 +40,38 @@
   gap: 16px;
 }
 
+/* Header Avatar Circle Thumbnail */
+.header-avatar-frame {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--system-blue);
+  box-shadow: var(--shadow-neon);
+  overflow: hidden;
+  position: relative;
+  background: #050c1c;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  flex-shrink: 0;
+}
+
+.header-avatar-frame:hover {
+  transform: scale(1.08);
+  box-shadow: var(--shadow-neon-strong);
+  border-color: #ffffff;
+}
+
+.header-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .rank-badge {
   font-family: var(--font-system);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
-  padding: 6px 14px;
+  padding: 4px 12px;
   border-radius: var(--radius-md);
   text-align: center;
   letter-spacing: 2px;
@@ -154,7 +181,7 @@
   position: absolute;
   top: -2px;
   right: -2px;
-  width: 10px;
+  width: 100px;
   height: 10px;
   background: var(--system-crimson);
   border-radius: 50%;
@@ -173,6 +200,7 @@
   gap: 8px;
   border-bottom: 1px solid rgba(0, 240, 255, 0.2);
   padding-bottom: 4px;
+  flex-wrap: wrap;
 }
 
 .nav-tab-btn {
@@ -278,6 +306,152 @@
   background: var(--system-blue);
   color: #000;
   box-shadow: var(--shadow-neon);
+}
+
+/* CHARACTER EVOLUTION CHAMBER TAB STYLES */
+.character-chamber-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .character-chamber-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.avatar-hero-card {
+  background: var(--bg-card);
+  border: 1px solid var(--system-blue);
+  box-shadow: var(--shadow-neon-strong);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  backdrop-filter: blur(12px);
+}
+
+.avatar-hero-image-wrapper {
+  width: 240px;
+  height: 240px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--system-blue);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.avatar-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.avatar-hero-card:hover .avatar-hero-img {
+  transform: scale(1.05);
+}
+
+.avatar-tier-title {
+  font-family: var(--font-system);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--system-blue);
+  text-shadow: 0 0 10px var(--system-blue);
+  margin-top: 8px;
+}
+
+.avatar-race-tag {
+  font-size: 13px;
+  color: var(--system-gold);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.avatar-description {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 12px;
+  background: rgba(5, 12, 28, 0.6);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+}
+
+/* Evolution Tree Timeline */
+.evolution-tree-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.evolution-stage-row {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: var(--transition-normal);
+  position: relative;
+}
+
+.evolution-stage-row.active {
+  border-color: var(--system-blue);
+  box-shadow: var(--shadow-neon);
+  background: rgba(12, 30, 65, 0.85);
+}
+
+.evolution-stage-row.locked {
+  opacity: 0.5;
+  filter: grayscale(0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.stage-thumb-wrapper {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--system-blue);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.stage-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
+
+.stage-title {
+  font-family: var(--font-system);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.evolution-stage-row.active .stage-title {
+  color: var(--system-blue);
+}
+
+.stage-req {
+  font-size: 12px;
+  color: var(--system-gold);
+  font-family: var(--font-system);
 }
 
 /* System Notifications Popup Toast */
