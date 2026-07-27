@@ -21,17 +21,13 @@ export class UIManager {
     this.renderCharacterChamber();
   }
 
-  // Render Header Player Stats & Avatar
+  // Render Header Player Stats
   renderHeader() {
     const player = store.data.player;
     const reqXp = SystemState.getRequiredXP(player.level);
     const rankInfo = SystemState.getRankInfo(player.level);
     const evoInfo = SystemState.getAvatarEvolution(player.level);
     const xpPercent = Math.min(100, Math.round((player.xp / reqXp) * 100));
-
-    // Avatar Thumbnail in Header
-    const avatarImgEl = document.getElementById('header-avatar-img');
-    if (avatarImgEl) avatarImgEl.src = evoInfo.currentTier.image;
 
     // Rank Badge
     const rankBadgeEl = document.getElementById('header-rank-badge');
@@ -110,14 +106,14 @@ export class UIManager {
     }
   }
 
-  // Render Character Evolution Chamber Tab
+  // Render Character Profile Chamber Tab
   renderCharacterChamber() {
     const player = store.data.player;
     const evoInfo = SystemState.getAvatarEvolution(player.level);
 
-    // Active Card
-    const cardImg = document.getElementById('char-hero-image');
-    if (cardImg) cardImg.src = evoInfo.currentTier.image;
+    // Active Card Emojis & Titles
+    const cardIcon = document.getElementById('char-hero-icon');
+    if (cardIcon) cardIcon.textContent = evoInfo.currentTier.icon;
 
     const cardTitle = document.getElementById('char-hero-title');
     if (cardTitle) cardTitle.textContent = evoInfo.currentTier.name;
@@ -131,7 +127,14 @@ export class UIManager {
     const nameInput = document.getElementById('char-name-input');
     if (nameInput) nameInput.value = player.name;
 
-    // Render Evolution Tree Timeline
+    // Stats Grid
+    const stats = player.stats;
+    if (document.getElementById('char-stat-str')) document.getElementById('char-stat-str').textContent = stats.strength;
+    if (document.getElementById('char-stat-agi')) document.getElementById('char-stat-agi').textContent = stats.agility;
+    if (document.getElementById('char-stat-sen')) document.getElementById('char-stat-sen').textContent = stats.sense;
+    if (document.getElementById('char-stat-int')) document.getElementById('char-stat-int').textContent = stats.intelligence;
+
+    // Render Compact Evolution Tree Timeline
     const treeContainer = document.getElementById('char-evolution-tree');
     if (!treeContainer) return;
 
@@ -140,16 +143,16 @@ export class UIManager {
       const isUnlocked = player.level >= tier.minLevel;
 
       return `
-        <div class="evolution-stage-row ${isCurrent ? 'active' : (isUnlocked ? '' : 'locked')}">
-          <div class="stage-thumb-wrapper">
-            <img src="${tier.image}" class="stage-thumb-img" alt="${tier.name}">
-          </div>
-          <div class="stage-info">
-            <div class="stage-title">${isUnlocked ? tier.name : '🔒 Заблокированная форма'}</div>
-            <div style="font-size: 12px; color: var(--text-muted);">${tier.race}</div>
-            <div class="stage-req">
-              ${isCurrent ? '⭐ ТЕКУЩАЯ ФОРМА (Уровень ' + player.level + ')' : (isUnlocked ? '✓ РАЗБЛОКИРОВАНО' : '🔒 ТРЕБУЕТСЯ ' + tier.minLevel + ' УРОВЕНЬ')}
+        <div class="evolution-stage-row-compact ${isCurrent ? 'active' : (isUnlocked ? '' : 'locked')}">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="stage-badge-icon">${tier.icon}</div>
+            <div>
+              <div class="stage-title">${isUnlocked ? tier.name : '🔒 Заблокированная форма'}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">${tier.race}</div>
             </div>
+          </div>
+          <div class="stage-req" style="text-align: right; font-size: 11px;">
+            ${isCurrent ? '⭐ ТЕКУЩАЯ ФОРМА' : (isUnlocked ? '✓ РАЗБЛОКИРОВАНО' : '🔒 ТРЕБУЕТСЯ ' + tier.minLevel + ' УРОВЕНЬ')}
           </div>
         </div>
       `;
@@ -291,6 +294,7 @@ export class UIManager {
             sound.playStatClick();
             this.renderHeader();
             this.renderStatusModal();
+            this.renderCharacterChamber();
           }
         });
       }
@@ -306,15 +310,6 @@ export class UIManager {
           this.renderHeader();
           this.showToast('ИМЯ ОБНОВЛЕНО ⚔️', `Ваше имя изменено на "${input.value.trim()}"!`);
         }
-      });
-    }
-
-    // Avatar thumbnail click -> switch tab to Character
-    const headerAvatar = document.getElementById('header-avatar-frame');
-    if (headerAvatar) {
-      headerAvatar.addEventListener('click', () => {
-        const charTabBtn = document.querySelector('.nav-tab-btn[data-tab="character"]');
-        if (charTabBtn) charTabBtn.click();
       });
     }
 

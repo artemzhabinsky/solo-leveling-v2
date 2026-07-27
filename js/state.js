@@ -34,7 +34,7 @@ export class SystemState {
         maxLevel: 5,
         name: 'Нищий Гоблин-Оборванец',
         race: 'Раса: Лесной Слакер E-Ранга',
-        image: 'assets/avatars/tier_1.jpg',
+        icon: '🧟',
         description: 'Самое слабое существо в подземелье. Ходит в рванье с палкой и боится каждого шороха. Выполняйте задачи, чтобы перестать быть оборванцем!',
         nextUnlock: 6
       },
@@ -44,7 +44,7 @@ export class SystemState {
         maxLevel: 15,
         name: 'D-Ранг Новичок в Броне',
         race: 'Раса: Начинающий Качатель Правых Рук',
-        image: 'assets/avatars/tier_2.jpg',
+        icon: '🛡️',
         description: 'Уже не гоблин, но меч всё ещё затуплен. Первые успехи в дисциплине дают о себе знать! Пора переходить к серьезным нагрузкам.',
         nextUnlock: 16
       },
@@ -54,7 +54,7 @@ export class SystemState {
         maxLevel: 35,
         name: 'C-Ранг Адепт Качалки',
         race: 'Раса: Воин Дневного Стрика',
-        image: 'assets/avatars/tier_3.jpg',
+        icon: '⚔️',
         description: 'Прокачанные мускулы, двойные кинжалы и стальной пресс. Прокрастинаторы бегут в страхе, когда ты берешься за список дел!',
         nextUnlock: 36
       },
@@ -64,7 +64,7 @@ export class SystemState {
         maxLevel: 65,
         name: 'B-Ранг Тёмный Рыцарь Тей',
         race: 'Раса: Командир Теневого Подразделения',
-        image: 'assets/avatars/tier_4.jpg',
+        icon: '🌌',
         description: 'Тёмный рыцарь в обсидиановых доспехах с сияющими глазами. Задачи A и S ранга выполняются на одном дыхании.',
         nextUnlock: 66
       },
@@ -74,7 +74,7 @@ export class SystemState {
         maxLevel: 999,
         name: 'Абсолютный Теневой Гигачад Монарх',
         race: 'Раса: Бог Дисциплины и Продуктивности',
-        image: 'assets/avatars/tier_5.jpg',
+        icon: '👑',
         description: 'Высшая форма эволюции! Восседает на троне с армией теней. Ни одна задача в мире не способна устоять перед твоим фокусом.',
         nextUnlock: null
       }

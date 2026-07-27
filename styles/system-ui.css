@@ -37,34 +37,7 @@
 .player-identity {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-/* Header Avatar Circle Thumbnail */
-.header-avatar-frame {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 2px solid var(--system-blue);
-  box-shadow: var(--shadow-neon);
-  overflow: hidden;
-  position: relative;
-  background: #050c1c;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  flex-shrink: 0;
-}
-
-.header-avatar-frame:hover {
-  transform: scale(1.08);
-  box-shadow: var(--shadow-neon-strong);
-  border-color: #ffffff;
-}
-
-.header-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  gap: 14px;
 }
 
 .rank-badge {
@@ -181,7 +154,7 @@
   position: absolute;
   top: -2px;
   right: -2px;
-  width: 100px;
+  width: 10px;
   height: 10px;
   background: var(--system-crimson);
   border-radius: 50%;
@@ -308,150 +281,141 @@
   box-shadow: var(--shadow-neon);
 }
 
-/* CHARACTER EVOLUTION CHAMBER TAB STYLES */
-.character-chamber-grid {
+/* MINIMALIST & COMPACT CHARACTER PROFILE TAB */
+.character-chamber-compact {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 24px;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
-@media (max-width: 900px) {
-  .character-chamber-grid {
+@media (max-width: 850px) {
+  .character-chamber-compact {
     grid-template-columns: 1fr;
   }
 }
 
-.avatar-hero-card {
+.avatar-hero-card-compact {
   background: var(--bg-card);
-  border: 1px solid var(--system-blue);
-  box-shadow: var(--shadow-neon-strong);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: var(--shadow-neon);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  position: relative;
-  backdrop-filter: blur(12px);
 }
 
-.avatar-hero-image-wrapper {
-  width: 240px;
-  height: 240px;
-  border-radius: var(--radius-lg);
+.avatar-compact-badge {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.2) 0%, rgba(5, 12, 28, 0.9) 70%);
   border: 2px solid var(--system-blue);
-  box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 16px;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
 }
 
-.avatar-hero-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
+.avatar-hero-emoji {
+  font-size: 48px;
 }
 
-.avatar-hero-card:hover .avatar-hero-img {
-  transform: scale(1.05);
-}
-
-.avatar-tier-title {
+.avatar-tier-title-compact {
   font-family: var(--font-system);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--system-blue);
-  text-shadow: 0 0 10px var(--system-blue);
-  margin-top: 8px;
-}
-
-.avatar-race-tag {
-  font-size: 13px;
-  color: var(--system-gold);
-  font-weight: 600;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
   margin-top: 4px;
 }
 
-.avatar-description {
-  font-size: 13px;
+.avatar-description-compact {
+  font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.5;
-  margin-top: 12px;
+  line-height: 1.4;
+  margin-top: 14px;
   background: rgba(5, 12, 28, 0.6);
-  padding: 12px;
+  padding: 10px 12px;
   border-radius: var(--radius-md);
   border: 1px solid rgba(0, 240, 255, 0.15);
+  text-align: left;
 }
 
-/* Evolution Tree Timeline */
-.evolution-tree-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.evolution-stage-row {
-  background: var(--bg-card);
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  transition: var(--transition-normal);
-  position: relative;
-}
-
-.evolution-stage-row.active {
-  border-color: var(--system-blue);
-  box-shadow: var(--shadow-neon);
-  background: rgba(12, 30, 65, 0.85);
-}
-
-.evolution-stage-row.locked {
-  opacity: 0.5;
-  filter: grayscale(0.8);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.stage-thumb-wrapper {
-  width: 70px;
-  height: 70px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--system-blue);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.stage-thumb-img {
+.char-stats-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  margin-top: 14px;
 }
 
-.stage-info {
+.char-stat-item {
+  background: rgba(5, 12, 28, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex-grow: 1;
+  align-items: flex-start;
 }
 
-.stage-title {
+.char-stat-item .lbl {
+  font-size: 10px;
+  color: var(--system-blue);
+  font-family: var(--font-system);
+}
+
+.char-stat-item strong {
   font-family: var(--font-system);
   font-size: 16px;
-  font-weight: 700;
   color: #ffffff;
+  margin-top: 2px;
 }
 
-.evolution-stage-row.active .stage-title {
-  color: var(--system-blue);
+/* Compact Evolution Tree */
+.evolution-tree-compact-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.stage-req {
-  font-size: 12px;
-  color: var(--system-gold);
-  font-family: var(--font-system);
+.evolution-stage-row-compact {
+  background: rgba(5, 12, 28, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: var(--transition-fast);
+}
+
+.evolution-stage-row-compact.active {
+  border-color: var(--system-blue);
+  background: rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+}
+
+.evolution-stage-row-compact.locked {
+  opacity: 0.5;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.stage-badge-icon {
+  font-size: 26px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 240, 255, 0.05);
+  border-radius: 8px;
 }
 
 /* System Notifications Popup Toast */
