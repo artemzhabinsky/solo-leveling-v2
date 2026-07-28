@@ -3,11 +3,11 @@
  */
 
 export const RANK_REWARDS = {
-  E: { xp: 50, coins: 10 },
-  D: { xp: 100, coins: 20 },
-  C: { xp: 250, coins: 50 },
-  B: { xp: 500, coins: 100 },
-  A: { xp: 1000, coins: 200 },
+  E: { xp: 100, coins: 20 },
+  D: { xp: 200, coins: 40 },
+  C: { xp: 500, coins: 100 },
+  B: { xp: 1000, coins: 200 },
+  A: { xp: 1500, coins: 300 },
   S: { xp: 2500, coins: 500 },
 };
 

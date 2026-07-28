@@ -14,6 +14,7 @@ export function RewardShopView() {
     setCustomRewardCost,
     setCustomRewardEmoji,
     addCustomReward,
+    deleteCatalogItem,
     buyReward,
     useInventoryItem,
     cleanExpiredInventory
@@ -70,23 +71,23 @@ export function RewardShopView() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Header Banner matching Screenshot 4 */}
+      {/* Header Banner with Clean Title without Typos */}
       <div style={{ borderBottom: '1px solid rgba(255, 215, 0, 0.2)', paddingBottom: '12px' }}>
         <div style={{ fontSize: '11px', color: 'var(--system-gold)', fontFamily: 'var(--font-orbitron)', letterSpacing: '2px', fontWeight: 700 }}>
           ◆ ОБМЕН МОНЕТ
         </div>
         <h1 className="font-orbitron text-gold-glow" style={{ fontSize: '28px', color: '#ffffff', letterSpacing: '1px', marginTop: '4px' }}>
-          МАГА ЗИН
+          МАГАЗИН НАГРАД
         </h1>
         <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginTop: '2px' }}>
           Награды стоят монет, а монеты падают только с закрытых задач. Купленное живёт 24 часа.
         </div>
       </div>
 
-      {/* Side-by-Side Layout matching Screenshot 4 */}
+      {/* Side-by-Side Layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'stretch' }}>
         
-        {/* LEFT COLUMN: Каталог Наград */}
+        {/* LEFT COLUMN: Каталог Наград с кнопками удаления */}
         <div className="task-section-card-container" style={{ borderColor: 'rgba(255, 215, 0, 0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 className="font-orbitron" style={{ color: '#ffffff', fontSize: '18px' }}>Каталог наград</h3>
@@ -97,7 +98,7 @@ export function RewardShopView() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flexGrow: 1 }}>
             {catalog.length === 0 ? (
-              <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px' }}>Наград пока нет.</div>
+              <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px' }}>Наград пока нет. Добавьте свою!</div>
             ) : (
               catalog.map(item => {
                 const canAfford = gold >= item.cost;
@@ -112,14 +113,25 @@ export function RewardShopView() {
                       <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '2px' }}>{item.description}</div>
                     </div>
 
-                    <button
-                      onClick={() => handleBuy(item)}
-                      disabled={!canAfford}
-                      className={`btn-system ${canAfford ? 'btn-gold' : ''}`}
-                      style={{ opacity: canAfford ? 1 : 0.4, cursor: canAfford ? 'pointer' : 'not-allowed', whiteSpace: 'nowrap' }}
-                    >
-                      🪙 {item.cost}
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        onClick={() => handleBuy(item)}
+                        disabled={!canAfford}
+                        className={`btn-system ${canAfford ? 'btn-gold' : ''}`}
+                        style={{ opacity: canAfford ? 1 : 0.4, cursor: canAfford ? 'pointer' : 'not-allowed', whiteSpace: 'nowrap', padding: '6px 12px', fontSize: '13px' }}
+                      >
+                        🪙 {item.cost}
+                      </button>
+
+                      <button
+                        onClick={() => deleteCatalogItem(item.id)}
+                        className="btn-system btn-danger"
+                        style={{ padding: '6px 8px', fontSize: '12px' }}
+                        title="Удалить награду"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                 );
               })
@@ -127,7 +139,7 @@ export function RewardShopView() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Инвентарь (Купленные Награды с 24ч Таймерами и Кнопкой Использовать) */}
+        {/* RIGHT COLUMN: Инвентарь с двухстрочным таймером */}
         <div className="task-section-card-container" style={{ borderColor: 'rgba(0, 240, 255, 0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 className="font-orbitron" style={{ color: '#ffffff', fontSize: '18px' }}>Инвентарь</h3>
@@ -150,9 +162,13 @@ export function RewardShopView() {
 
                   <div style={{ flexGrow: 1 }}>
                     <div className="task-title" style={{ fontSize: '15px', fontWeight: 600 }}>{invItem.title}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--system-crimson)', fontWeight: 700, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span>⏳ Сгорит через:</span>
-                      <span>{formatTimeLeft(invItem.expiresAt)}</span>
+                    
+                    {/* Two-Line Timer Display preventing layout overflow */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>⏳ Сгорит через:</span>
+                      <span style={{ fontSize: '12px', color: 'var(--system-crimson)', fontWeight: 700, fontFamily: 'var(--font-body)' }}>
+                        {formatTimeLeft(invItem.expiresAt)}
+                      </span>
                     </div>
                   </div>
 

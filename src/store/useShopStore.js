@@ -15,7 +15,7 @@ export const useShopStore = create()(
   persist(
     (set, get) => ({
       catalog: INITIAL_SHOP_ITEMS,
-      inventory: [], // [{ id, shopItemId, title, cost, emoji, description, purchasedAt, expiresAt }]
+      inventory: [],
       customRewardTitle: '',
       customRewardCost: 100,
       customRewardEmoji: '🎁',
@@ -42,6 +42,12 @@ export const useShopStore = create()(
           customRewardCost: 100,
           customRewardEmoji: '🎁'
         });
+      },
+
+      deleteCatalogItem: (itemId) => {
+        set((state) => ({
+          catalog: state.catalog.filter(item => item.id !== itemId)
+        }));
       },
 
       buyReward: (item, spendGoldFn) => {

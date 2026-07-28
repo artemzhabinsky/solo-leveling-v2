@@ -1,5 +1,5 @@
 /**
- * Tasks Store (Zustand)
+ * Tasks & Subtasks Store (Zustand)
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -15,12 +15,16 @@ export const useTaskStore = create()(
           description: 'Проверить структуру модулей и подсистем.',
           category: 'mental',
           rank: 'B',
-          xpReward: 500,
-          coinReward: 100,
+          xpReward: 1000,
+          coinReward: 200,
           status: 'urgent',
           dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
           originalDueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-          completedAt: null
+          completedAt: null,
+          subtasks: [
+            { id: 'sub-1', title: 'Проверить состояние стора Zustand', completed: true },
+            { id: 'sub-2', title: 'Оптимизировать рендеринг списков', completed: false }
+          ]
         },
         {
           id: 'task-2',
@@ -28,12 +32,17 @@ export const useTaskStore = create()(
           description: 'Зарядка для поддержания формы.',
           category: 'physical',
           rank: 'C',
-          xpReward: 250,
-          coinReward: 50,
+          xpReward: 500,
+          coinReward: 100,
           status: 'non_urgent',
           dueDate: new Date().toISOString().split('T')[0],
           originalDueDate: new Date().toISOString().split('T')[0],
-          completedAt: null
+          completedAt: null,
+          subtasks: [
+            { id: 'sub-3', title: 'Разминка 5 минут', completed: true },
+            { id: 'sub-4', title: 'Отжимания 50 повторений', completed: false },
+            { id: 'sub-5', title: 'Приседания 50 повторений', completed: false }
+          ]
         },
         {
           id: 'task-3',
@@ -41,12 +50,13 @@ export const useTaskStore = create()(
           description: 'Изучить главу про управление фокусом.',
           category: 'discipline',
           rank: 'D',
-          xpReward: 100,
-          coinReward: 20,
+          xpReward: 200,
+          coinReward: 40,
           status: 'done',
           dueDate: new Date().toISOString().split('T')[0],
           originalDueDate: new Date().toISOString().split('T')[0],
-          completedAt: new Date().toISOString()
+          completedAt: new Date().toISOString(),
+          subtasks: []
         }
       ],
       currentView: 'list',
@@ -73,7 +83,8 @@ export const useTaskStore = create()(
           status: taskData.status || 'urgent',
           dueDate: dueDate,
           originalDueDate: dueDate,
-          completedAt: null
+          completedAt: null,
+          subtasks: taskData.subtasks || []
         };
 
         set((state) => ({ tasks: [newTask, ...state.tasks] }));
@@ -93,6 +104,21 @@ export const useTaskStore = create()(
                 xpReward: reward.xp,
                 coinReward: reward.coins
               };
+            }
+            return t;
+          })
+        });
+      },
+
+      toggleSubtask: (taskId, subtaskId) => {
+        const { tasks } = get();
+        set({
+          tasks: tasks.map(t => {
+            if (t.id === taskId && t.subtasks) {
+              const updatedSubtasks = t.subtasks.map(s => 
+                s.id === subtaskId ? { ...s, completed: !s.completed } : s
+              );
+              return { ...t, subtasks: updatedSubtasks };
             }
             return t;
           })
@@ -119,7 +145,6 @@ export const useTaskStore = create()(
         const nextTasks = tasks.map(t => t.id === taskId ? updatedTask : t);
         set({ tasks: nextTasks });
 
-        // Check if all planned tasks for TODAY are now completed!
         const todayPlanned = nextTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr);
         const allTodayPlannedDone = todayPlanned.length > 0 && todayPlanned.every(t => t.status === 'done');
 

@@ -16,6 +16,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
     setFilterRank,
     addTask,
     editTask,
+    toggleSubtask,
     updateTaskStatus,
     deleteTask
   } = useTaskStore();
@@ -25,13 +26,16 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const [editingTask, setEditingTask] = useState(null);
   const [isTodayCompletedModalOpen, setIsTodayCompletedModalOpen] = useState(false);
 
+  const [newSubtaskInput, setNewSubtaskInput] = useState('');
+
   const [taskForm, setTaskForm] = useState({
     title: '',
     description: '',
     category: 'mental',
     rank: 'C',
     status: 'urgent',
-    dueDate: new Date().toISOString().split('T')[0]
+    dueDate: new Date().toISOString().split('T')[0],
+    subtasks: []
   });
 
   const filteredTasks = tasks.filter(t => {
@@ -64,7 +68,15 @@ export function TaskTrackerView({ onShowLevelUp }) {
     if (!taskForm.title.trim()) return;
 
     addTask(taskForm);
-    setTaskForm({ title: '', description: '', category: 'mental', rank: 'C', status: 'urgent', dueDate: new Date().toISOString().split('T')[0] });
+    setTaskForm({
+      title: '',
+      description: '',
+      category: 'mental',
+      rank: 'C',
+      status: 'urgent',
+      dueDate: new Date().toISOString().split('T')[0],
+      subtasks: []
+    });
     setIsAddModalOpen(false);
   };
 
@@ -74,6 +86,27 @@ export function TaskTrackerView({ onShowLevelUp }) {
 
     editTask(editingTask.id, editingTask);
     setEditingTask(null);
+  };
+
+  // Subtask helper methods for Add/Edit forms
+  const handleAddSubtaskToForm = (isEdit = false) => {
+    if (!newSubtaskInput.trim()) return;
+    const subObj = { id: 'sub-' + Date.now(), title: newSubtaskInput.trim(), completed: false };
+
+    if (isEdit) {
+      setEditingTask({ ...editingTask, subtasks: [...(editingTask.subtasks || []), subObj] });
+    } else {
+      setTaskForm({ ...taskForm, subtasks: [...taskForm.subtasks, subObj] });
+    }
+    setNewSubtaskInput('');
+  };
+
+  const handleRemoveSubtaskFromForm = (subId, isEdit = false) => {
+    if (isEdit) {
+      setEditingTask({ ...editingTask, subtasks: editingTask.subtasks.filter(s => s.id !== subId) });
+    } else {
+      setTaskForm({ ...taskForm, subtasks: taskForm.subtasks.filter(s => s.id !== subId) });
+    }
   };
 
   // Drag & Drop Handlers for Kanban Board
@@ -121,19 +154,51 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const weekTasks = filteredTasks.filter(t => t.dueDate > tomorrowStr && t.dueDate <= weekEndStr);
   const laterTasks = filteredTasks.filter(t => t.dueDate > weekEndStr);
 
-  // Planned vs Actual count for TODAY
   const todayPlannedCount = filteredTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr).length;
   const todayActualDoneCount = todayTasks.filter(t => t.status === 'done').length;
+
+  const renderSubtasksChecklist = (t) => {
+    if (!t.subtasks || t.subtasks.length === 0) return null;
+
+    const completedSubs = t.subtasks.filter(s => s.completed).length;
+    const totalSubs = t.subtasks.length;
+    const percent = Math.round((completedSubs / totalSubs) * 100);
+
+    return (
+      <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(0,240,255,0.1)', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--system-blue)', fontWeight: 600, marginBottom: '6px' }}>
+          <span>ПОДЗАДАЧИ ({completedSubs}/{totalSubs})</span>
+          <span>{percent}%</span>
+        </div>
+
+        {/* Subtask Progress Bar */}
+        <div style={{ width: '100%', height: '4px', background: 'rgba(5, 12, 30, 0.8)', borderRadius: '2px', overflow: 'hidden', marginBottom: '8px' }}>
+          <div style={{ width: `${percent}%`, height: '100%', background: 'var(--system-blue)', transition: 'width 0.3s ease' }}></div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {t.subtasks.map(s => (
+            <div key={s.id} onClick={(e) => { e.stopPropagation(); toggleSubtask(t.id, s.id); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px', color: s.completed ? 'var(--text-dim)' : 'var(--text-main)', textDecoration: s.completed ? 'line-through' : 'none' }}>
+              <span style={{ width: '14px', height: '14px', borderRadius: '3px', border: '1px solid var(--system-blue)', display: 'inline-flex', alignItems: 'center', justifyCenter: 'center', fontSize: '10px', fontWeight: 'bold', color: 'var(--system-blue)', background: s.completed ? 'rgba(0,240,255,0.2)' : 'transparent' }}>
+                {s.completed && '✓'}
+              </span>
+              <span>{s.title}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderTaskCard = (t) => {
     const cat = CATEGORIES.find(c => c.key === t.category);
     const isDone = t.status === 'done';
     return (
-      <div key={t.id} className={`task-item-card ${isDone ? 'completed' : ''}`}>
+      <div key={t.id} className={`task-item-card ${isDone ? 'completed' : ''}`} style={{ flexWrap: 'wrap' }}>
         <div onClick={() => handleToggleTask(t.id)} className="task-checkbox-custom">
           {isDone && '✓'}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1, minWidth: '220px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className={`rank-badge rank-${t.rank}`} style={{ fontSize: '11px', padding: '2px 8px' }}>{t.rank}-RANK</span>
             <span className="task-title" style={{ fontSize: '15px', fontWeight: 600 }}>{t.title}</span>
@@ -143,6 +208,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
             {cat && <span style={{ color: cat.color, fontWeight: 600 }}>{cat.label}</span>}
             <span>📅 {t.dueDate || 'Без даты'}</span>
           </div>
+          {renderSubtasksChecklist(t)}
         </div>
 
         <div className="rewards-pill">
@@ -300,7 +366,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       )}
 
-      {/* KANBAN VIEW WITH DUE DATE DISPLAY & DRAG AND DROP */}
+      {/* KANBAN VIEW WITH DUE DATE & SUBTASKS */}
       {currentView === 'kanban' && (
         <div className="kanban-board-grid" style={{ marginTop: '16px' }}>
           {[
@@ -343,6 +409,8 @@ export function TaskTrackerView({ onShowLevelUp }) {
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📅 {t.dueDate || 'Без даты'}</span>
                       </div>
 
+                      {renderSubtasksChecklist(t)}
+
                       <div style={{ display: 'flex', gap: '6px', marginTop: '12px', width: '100%', justifyContent: 'flex-end' }}>
                         <button onClick={() => setEditingTask(t)} className="btn-system" style={{ padding: '4px 8px', fontSize: '11px' }}>✏️ Редактировать</button>
                         <button onClick={() => handleToggleTask(t.id)} className="btn-system" style={{ padding: '4px 8px', fontSize: '11px' }}>
@@ -384,7 +452,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       )}
 
-      {/* CREATE TASK MODAL */}
+      {/* CREATE TASK MODAL WITH SUBTASKS CHECKLIST */}
       {isAddModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -401,7 +469,24 @@ export function TaskTrackerView({ onShowLevelUp }) {
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>ОПИСАНИЕ</label>
-                <textarea value={taskForm.description} onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })} className="textarea-system" rows="3" placeholder="Подробное описание..." style={{ marginTop: '4px' }}></textarea>
+                <textarea value={taskForm.description} onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })} className="textarea-system" rows="2" placeholder="Подробное описание..." style={{ marginTop: '4px' }}></textarea>
+              </div>
+
+              {/* Subtasks Adding Interface */}
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>ПОДЗАДАЧИ (ЧЕК-ЛИСТ)</label>
+                <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                  <input type="text" value={newSubtaskInput} onChange={(e) => setNewSubtaskInput(e.target.value)} className="input-system" placeholder="Добавить пункт подзадачи..." />
+                  <button type="button" onClick={() => handleAddSubtaskToForm(false)} className="btn-system" style={{ fontSize: '12px', padding: '6px 12px' }}>+ Подзадача</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
+                  {taskForm.subtasks.map(s => (
+                    <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(5,12,28,0.7)', padding: '6px 10px', borderRadius: '4px', fontSize: '12px' }}>
+                      <span>• {s.title}</span>
+                      <button type="button" onClick={() => handleRemoveSubtaskFromForm(s.id, false)} style={{ background: 'none', border: 'none', color: 'var(--system-crimson)', cursor: 'pointer' }}>✕</button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -414,11 +499,11 @@ export function TaskTrackerView({ onShowLevelUp }) {
                 <div>
                   <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>РАНГ ПРИОРИТЕТА</label>
                   <select value={taskForm.rank} onChange={(e) => setTaskForm({ ...taskForm, rank: e.target.value })} className="select-system" style={{ marginTop: '4px' }}>
-                    <option value="C">C-Rank (250 XP, 50 🪙)</option>
-                    <option value="E">E-Rank (50 XP, 10 🪙)</option>
-                    <option value="D">D-Rank (100 XP, 20 🪙)</option>
-                    <option value="B">B-Rank (500 XP, 100 🪙)</option>
-                    <option value="A">A-Rank (1000 XP, 200 🪙)</option>
+                    <option value="C">C-Rank (500 XP, 100 🪙)</option>
+                    <option value="E">E-Rank (100 XP, 20 🪙)</option>
+                    <option value="D">D-Rank (200 XP, 40 🪙)</option>
+                    <option value="B">B-Rank (1000 XP, 200 🪙)</option>
+                    <option value="A">A-Rank (1500 XP, 300 🪙)</option>
                     <option value="S">S-Rank (2500 XP, 500 🪙)</option>
                   </select>
                 </div>
@@ -447,7 +532,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       )}
 
-      {/* EDIT TASK POPUP MODAL */}
+      {/* EDIT TASK POPUP MODAL WITH SUBTASKS CHECKLIST */}
       {editingTask && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -464,7 +549,24 @@ export function TaskTrackerView({ onShowLevelUp }) {
 
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>ОПИСАНИЕ</label>
-                <textarea value={editingTask.description || ''} onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })} className="textarea-system" rows="3" style={{ marginTop: '4px' }}></textarea>
+                <textarea value={editingTask.description || ''} onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })} className="textarea-system" rows="2" style={{ marginTop: '4px' }}></textarea>
+              </div>
+
+              {/* Subtasks Editing Interface */}
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>ПОДЗАДАЧИ (ЧЕК-ЛИСТ)</label>
+                <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                  <input type="text" value={newSubtaskInput} onChange={(e) => setNewSubtaskInput(e.target.value)} className="input-system" placeholder="Добавить пункт подзадачи..." />
+                  <button type="button" onClick={() => handleAddSubtaskToForm(true)} className="btn-system" style={{ fontSize: '12px', padding: '6px 12px' }}>+ Подзадача</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
+                  {(editingTask.subtasks || []).map(s => (
+                    <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(5,12,28,0.7)', padding: '6px 10px', borderRadius: '4px', fontSize: '12px' }}>
+                      <span>• {s.title}</span>
+                      <button type="button" onClick={() => handleRemoveSubtaskFromForm(s.id, true)} style={{ background: 'none', border: 'none', color: 'var(--system-crimson)', cursor: 'pointer' }}>✕</button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -477,11 +579,11 @@ export function TaskTrackerView({ onShowLevelUp }) {
                 <div>
                   <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>РАНГ ПРИОРИТЕТА</label>
                   <select value={editingTask.rank} onChange={(e) => setEditingTask({ ...editingTask, rank: e.target.value })} className="select-system" style={{ marginTop: '4px' }}>
-                    <option value="C">C-Rank (250 XP, 50 🪙)</option>
-                    <option value="E">E-Rank (50 XP, 10 🪙)</option>
-                    <option value="D">D-Rank (100 XP, 20 🪙)</option>
-                    <option value="B">B-Rank (500 XP, 100 🪙)</option>
-                    <option value="A">A-Rank (1000 XP, 200 🪙)</option>
+                    <option value="C">C-Rank (500 XP, 100 🪙)</option>
+                    <option value="E">E-Rank (100 XP, 20 🪙)</option>
+                    <option value="D">D-Rank (200 XP, 40 🪙)</option>
+                    <option value="B">B-Rank (1000 XP, 200 🪙)</option>
+                    <option value="A">A-Rank (1500 XP, 300 🪙)</option>
                     <option value="S">S-Rank (2500 XP, 500 🪙)</option>
                   </select>
                 </div>
