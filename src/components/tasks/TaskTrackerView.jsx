@@ -3,6 +3,7 @@ import { useTaskStore } from '../../store/useTaskStore.js';
 import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { CATEGORIES } from '../../domain/categories.js';
 import { sfx } from '../../services/audioService.js';
+import { TodayCompletedModal } from '../modals/TodayCompletedModal.jsx';
 
 export function TaskTrackerView({ onShowLevelUp }) {
   const {
@@ -24,6 +25,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [isTodayCompletedModalOpen, setIsTodayCompletedModalOpen] = useState(false);
 
   const [taskForm, setTaskForm] = useState({
     title: '',
@@ -53,6 +55,9 @@ export function TaskTrackerView({ onShowLevelUp }) {
       const rewardResult = awardXpAndGold(task.xpReward, task.coinReward, task.category);
       if (rewardResult.leveledUp) {
         onShowLevelUp(rewardResult);
+      }
+      if (result.allTodayCompleted) {
+        setIsTodayCompletedModalOpen(true);
       }
     }
   };
@@ -98,6 +103,9 @@ export function TaskTrackerView({ onShowLevelUp }) {
           onShowLevelUp(rewardResult);
         }
       }
+      if (result.allTodayCompleted) {
+        setIsTodayCompletedModalOpen(true);
+      }
     }
   };
 
@@ -115,6 +123,10 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const tomorrowTasks = filteredTasks.filter(t => t.dueDate === tomorrowStr);
   const weekTasks = filteredTasks.filter(t => t.dueDate > tomorrowStr && t.dueDate <= weekEndStr);
   const laterTasks = filteredTasks.filter(t => t.dueDate > weekEndStr);
+
+  // Planned vs Actual count for TODAY
+  const todayPlannedCount = filteredTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr).length;
+  const todayActualDoneCount = todayTasks.filter(t => t.status === 'done').length;
 
   const renderTaskCard = (t) => {
     const cat = CATEGORIES.find(c => c.key === t.category);
@@ -149,11 +161,28 @@ export function TaskTrackerView({ onShowLevelUp }) {
     );
   };
 
-  const renderTaskSection = (sectionTitle, sectionTasks, styleConfig) => {
+  const renderTaskSection = (sectionTitle, sectionTasks, styleConfig, customCounterLabel = null) => {
+    if (sectionTasks.length === 0) return null;
+
+    // Sorting rule: Active tasks on top; Completed tasks on bottom sorted by completedAt descending (newest completed on top of closed stack)!
+    const sortedTasks = [...sectionTasks].sort((a, b) => {
+      const aDone = a.status === 'done';
+      const bDone = b.status === 'done';
+
+      if (!aDone && bDone) return -1;
+      if (aDone && !bDone) return 1;
+
+      if (aDone && bDone) {
+        const aTime = a.completedAt ? new Date(a.completedAt).getTime() : 0;
+        const bTime = b.completedAt ? new Date(b.completedAt).getTime() : 0;
+        return bTime - aTime;
+      }
+      return 0;
+    });
+
     const doneCount = sectionTasks.filter(t => t.status === 'done').length;
     const totalCount = sectionTasks.length;
-
-    if (totalCount === 0) return null;
+    const counterBadgeText = customCounterLabel !== null ? customCounterLabel : `${doneCount}/${totalCount}`;
 
     return (
       <div className="task-section-card-container" style={{ marginBottom: '24px' }}>
@@ -183,11 +212,11 @@ export function TaskTrackerView({ onShowLevelUp }) {
               borderRadius: '12px'
             }}
           >
-            {doneCount}/{totalCount}
+            {counterBadgeText}
           </span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {sectionTasks.map(t => renderTaskCard(t))}
+          {sortedTasks.map(t => renderTaskCard(t))}
         </div>
       </div>
     );
@@ -261,14 +290,14 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       </div>
 
-      {/* CHRONOLOGICAL GROUPED LIST VIEW WITH CARD CONTAINER BACKGROUNDS */}
+      {/* CHRONOLOGICAL GROUPED LIST VIEW */}
       {currentView === 'list' && (
         <div className="tasks-list-container" style={{ marginTop: '20px' }}>
           {filteredTasks.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px' }}>Задач не найдено. Нажмите "+ Новая Задача"!</div>
           ) : (
             <>
-              {renderTaskSection('СЕГОДНЯ', todayTasks, sectionStyles.today)}
+              {renderTaskSection('СЕГОДНЯ', todayTasks, sectionStyles.today, `${todayActualDoneCount}/${todayPlannedCount}`)}
               {renderTaskSection('ЗАВТРА', tomorrowTasks, sectionStyles.tomorrow)}
               {renderTaskSection('НА НЕДЕЛЕ', weekTasks, sectionStyles.week)}
               {renderTaskSection('ПОТОМ', laterTasks, sectionStyles.later)}
@@ -482,6 +511,12 @@ export function TaskTrackerView({ onShowLevelUp }) {
           </div>
         </div>
       )}
+
+      {/* TODAY ALL COMPLETED CELEBRATION MODAL */}
+      <TodayCompletedModal
+        isOpen={isTodayCompletedModalOpen}
+        onClose={() => setIsTodayCompletedModalOpen(false)}
+      />
     </div>
   );
 }

@@ -19,6 +19,7 @@ export const useTaskStore = create()(
           coinReward: 100,
           status: 'urgent',
           dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+          originalDueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
           completedAt: null
         },
         {
@@ -31,6 +32,7 @@ export const useTaskStore = create()(
           coinReward: 50,
           status: 'non_urgent',
           dueDate: new Date().toISOString().split('T')[0],
+          originalDueDate: new Date().toISOString().split('T')[0],
           completedAt: null
         },
         {
@@ -43,6 +45,7 @@ export const useTaskStore = create()(
           coinReward: 20,
           status: 'done',
           dueDate: new Date().toISOString().split('T')[0],
+          originalDueDate: new Date().toISOString().split('T')[0],
           completedAt: new Date().toISOString()
         }
       ],
@@ -58,6 +61,7 @@ export const useTaskStore = create()(
 
       addTask: (taskData) => {
         const reward = getRewardForRank(taskData.rank || 'C');
+        const dueDate = taskData.dueDate || new Date().toISOString().split('T')[0];
         const newTask = {
           id: 'task-' + Date.now(),
           title: taskData.title,
@@ -67,7 +71,8 @@ export const useTaskStore = create()(
           xpReward: reward.xp,
           coinReward: reward.coins,
           status: taskData.status || 'urgent',
-          dueDate: taskData.dueDate || new Date().toISOString().split('T')[0],
+          dueDate: dueDate,
+          originalDueDate: dueDate,
           completedAt: null
         };
 
@@ -107,15 +112,22 @@ export const useTaskStore = create()(
         const updatedTask = {
           ...task,
           status: newStatus,
-          dueDate: isNowDone ? todayStr : task.dueDate,
+          dueDate: isNowDone ? todayStr : task.originalDueDate || task.dueDate,
           completedAt: isNowDone ? new Date().toISOString() : null
         };
 
-        set({
-          tasks: tasks.map(t => t.id === taskId ? updatedTask : t)
-        });
+        const nextTasks = tasks.map(t => t.id === taskId ? updatedTask : t);
+        set({ tasks: nextTasks });
 
-        return { task: updatedTask, justCompleted: isNowDone && !wasDone };
+        // Check if all planned tasks for TODAY are now completed!
+        const todayPlanned = nextTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr);
+        const allTodayPlannedDone = todayPlanned.length > 0 && todayPlanned.every(t => t.status === 'done');
+
+        return {
+          task: updatedTask,
+          justCompleted: isNowDone && !wasDone,
+          allTodayCompleted: isNowDone && allTodayPlannedDone
+        };
       },
 
       deleteTask: (taskId) => {
