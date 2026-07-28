@@ -149,7 +149,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
     );
   };
 
-  const renderTaskSection = (sectionTitle, sectionTasks, colorHex = 'var(--system-blue)') => {
+  const renderTaskSection = (sectionTitle, sectionTasks, styleConfig) => {
     const doneCount = sectionTasks.filter(t => t.status === 'done').length;
     const totalCount = sectionTasks.length;
 
@@ -158,10 +158,31 @@ export function TaskTrackerView({ onShowLevelUp }) {
     return (
       <div style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-          <h3 className="font-system" style={{ color: colorHex, fontSize: '18px', fontWeight: 800, letterSpacing: '1px' }}>
+          <h3
+            className="font-system"
+            style={{
+              color: styleConfig.color,
+              opacity: styleConfig.opacity,
+              textShadow: styleConfig.glow ? `0 0 12px ${styleConfig.color}` : 'none',
+              fontSize: '18px',
+              fontWeight: 800,
+              letterSpacing: '1px'
+            }}
+          >
             {sectionTitle}
           </h3>
-          <span style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1px solid rgba(0, 240, 255, 0.25)', color: 'var(--text-main)', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
+          <span
+            style={{
+              background: styleConfig.badgeBg,
+              border: `1px solid ${styleConfig.badgeBorder}`,
+              color: styleConfig.badgeColor,
+              opacity: styleConfig.opacity,
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '12px'
+            }}
+          >
             {doneCount}/{totalCount}
           </span>
         </div>
@@ -170,6 +191,42 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       </div>
     );
+  };
+
+  // Brightness / Opacity Configurations for Section Headers
+  const sectionStyles = {
+    today: {
+      color: '#00f0ff',
+      opacity: 1.0,
+      glow: true,
+      badgeBg: 'rgba(0, 240, 255, 0.2)',
+      badgeBorder: '#00f0ff',
+      badgeColor: '#ffffff'
+    },
+    tomorrow: {
+      color: '#00e5ff',
+      opacity: 0.82,
+      glow: false,
+      badgeBg: 'rgba(0, 229, 255, 0.12)',
+      badgeBorder: 'rgba(0, 229, 255, 0.4)',
+      badgeColor: '#e2f1ff'
+    },
+    week: {
+      color: '#5c9eff',
+      opacity: 0.68,
+      glow: false,
+      badgeBg: 'rgba(92, 158, 255, 0.1)',
+      badgeBorder: 'rgba(92, 158, 255, 0.3)',
+      badgeColor: '#8ab4f8'
+    },
+    later: {
+      color: '#5c78a3',
+      opacity: 0.52,
+      glow: false,
+      badgeBg: 'rgba(92, 120, 163, 0.1)',
+      badgeBorder: 'rgba(92, 120, 163, 0.25)',
+      badgeColor: '#5c78a3'
+    }
   };
 
   return (
@@ -205,17 +262,17 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       </div>
 
-      {/* CHRONOLOGICAL GROUPED LIST VIEW (СЕГОДНЯ, ЗАВТРА, НА НЕДЕЛЕ, ПОТОМ) */}
+      {/* CHRONOLOGICAL GROUPED LIST VIEW WITH BRIGHTNESS HIERARCHY */}
       {currentView === 'list' && (
         <div className="tasks-list-container" style={{ marginTop: '20px' }}>
           {filteredTasks.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px' }}>Задач не найдено. Нажмите "+ Новая Задача"!</div>
           ) : (
             <>
-              {renderTaskSection('СЕГОДНЯ', todayTasks, '#00f0ff')}
-              {renderTaskSection('ЗАВТРА', tomorrowTasks, '#00e5ff')}
-              {renderTaskSection('НА НЕДЕЛЕ', weekTasks, '#8ab4f8')}
-              {renderTaskSection('ПОТОМ', laterTasks, '#5c78a3')}
+              {renderTaskSection('СЕГОДНЯ', todayTasks, sectionStyles.today)}
+              {renderTaskSection('ЗАВТРА', tomorrowTasks, sectionStyles.tomorrow)}
+              {renderTaskSection('НА НЕДЕЛЕ', weekTasks, sectionStyles.week)}
+              {renderTaskSection('ПОТОМ', laterTasks, sectionStyles.later)}
             </>
           )}
         </div>
