@@ -3,17 +3,14 @@ import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { getRankTitle } from '../../domain/ranks.js';
 import { xpRequiredForLevel } from '../../domain/xp.js';
 
-export function Header({ onOpenStatus }) {
-  const { name, level, xp, gold, hp, statPoints } = usePlayerStore();
+export function Header() {
+  const { name, level, xp, gold } = usePlayerStore();
   const rankInfo = getRankTitle(level);
   const reqXp = xpRequiredForLevel(level);
   const xpPercent = Math.min(100, Math.round((xp / reqXp) * 100));
 
-  // Render HP Hearts
-  const hearts = Array.from({ length: 3 }, (_, i) => i < hp);
-
   return (
-    <header class="system-header">
+    <header className="system-header">
       <div className="player-identity">
         <div className={`rank-badge rank-${rankInfo.rankCode}`}>
           {rankInfo.rankCode}-RANK
@@ -35,30 +32,12 @@ export function Header({ onOpenStatus }) {
         </div>
       </div>
 
-      {/* HP Hearts, Gold & Status Button */}
+      {/* Gold Balance Only */}
       <div className="stats-summary">
-        {/* HP Hearts */}
-        <div className="hp-hearts" title={`Здоровье HP: ${hp}/3`}>
-          {hearts.map((full, idx) => (
-            <span key={idx} style={{ opacity: full ? 1 : 0.25, filter: full ? 'drop-shadow(0 0 5px #ff2a5f)' : 'none' }}>
-              ❤️
-            </span>
-          ))}
-        </div>
-
-        {/* Gold */}
         <div className="currency-badge">
           <span>🪙</span>
           <span>{gold.toLocaleString()}</span>
         </div>
-
-        {/* Status Button */}
-        <button
-          onClick={onOpenStatus}
-          className={`btn-system stat-points-indicator ${statPoints > 0 ? 'has-points' : ''}`}
-        >
-          📊 СТАТУС {statPoints > 0 && `(+${statPoints})`}
-        </button>
       </div>
     </header>
   );

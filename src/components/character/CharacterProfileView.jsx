@@ -13,12 +13,14 @@ import Stage7 from '../avatar/stages/Stage7.jsx';
 
 const STAGE_SVGS = { 1: Stage1, 2: Stage2, 3: Stage3, 4: Stage4, 5: Stage5, 6: Stage6, 7: Stage7 };
 
-export function CharacterProfileView() {
-  const { name, level, stats, setName } = usePlayerStore();
+export function CharacterProfileView({ onOpenStatus }) {
+  const { name, level, stats, hp, statPoints, setName } = usePlayerStore();
   const [editName, setEditName] = useState(name);
 
   const currentStageNum = getStageForLevel(level);
   const currentStageInfo = STAGES.find(s => s.stage === currentStageNum) || STAGES[0];
+
+  const hearts = Array.from({ length: 3 }, (_, i) => i < hp);
 
   const handleSaveName = () => {
     if (editName.trim()) {
@@ -36,6 +38,18 @@ export function CharacterProfileView() {
         <h2 className="avatar-tier-title-compact">{currentStageInfo.title}</h2>
         <div className="avatar-race-tag">{currentStageInfo.race}</div>
 
+        {/* HP Hearts Display */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', background: 'rgba(255, 42, 95, 0.1)', border: '1px solid rgba(255, 42, 95, 0.3)', padding: '6px 14px', borderRadius: '20px' }}>
+          <span style={{ fontSize: '12px', fontFamily: 'var(--font-system)', color: 'var(--system-crimson)', fontWeight: 'bold' }}>ЗДОРОВЬЕ HP:</span>
+          <div style={{ display: 'flex', gap: '4px', fontSize: '16px' }}>
+            {hearts.map((full, idx) => (
+              <span key={idx} style={{ opacity: full ? 1 : 0.2, filter: full ? 'drop-shadow(0 0 6px #ff2a5f)' : 'none' }}>
+                ❤️
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Rename Input */}
         <div style={{ marginTop: '14px', width: '100%' }}>
           <label style={{ fontSize: '11px', color: 'var(--system-blue)', fontFamily: 'var(--font-system)' }}>ИМЯ ИГРОКА</label>
@@ -52,9 +66,18 @@ export function CharacterProfileView() {
           <div className="char-stat-item"><span className="lbl">VIT (Выносливость)</span><strong>{stats.vitality}</strong></div>
           <div className="char-stat-item"><span className="lbl">SEN (Восприятие)</span><strong>{stats.sense}</strong></div>
         </div>
+
+        {/* Open Status Allocation Modal Button */}
+        <button
+          onClick={onOpenStatus}
+          className={`btn-system ${statPoints > 0 ? 'btn-gold' : ''}`}
+          style={{ marginTop: '16px', width: '100%', justifyContent: 'center' }}
+        >
+          📊 ОКНО СТАТУСА {statPoints > 0 && `(+${statPoints})`}
+        </button>
       </div>
 
-      {/* Evolution Tree Grid with 7 SVG Stages */}
+      {/* Evolution Tree Grid */}
       <div className="daily-quest-panel">
         <div className="daily-quest-header">
           <div>
