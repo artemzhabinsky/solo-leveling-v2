@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "/Users/39apple.ru/bin/github-mcp-server",
+      "args": ["stdio"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "puppeteer": {
+      "command": "/Users/39apple.ru/.local/node/bin/npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    }
+  }
+}
