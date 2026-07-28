@@ -156,8 +156,8 @@ export function TaskTrackerView({ onShowLevelUp }) {
     if (totalCount === 0) return null;
 
     return (
-      <div style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+      <div className="task-section-card-container" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
           <h3
             className="font-system"
             style={{
@@ -186,14 +186,13 @@ export function TaskTrackerView({ onShowLevelUp }) {
             {doneCount}/{totalCount}
           </span>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {sectionTasks.map(t => renderTaskCard(t))}
         </div>
       </div>
     );
   };
 
-  // Brightness / Opacity Configurations for Section Headers
   const sectionStyles = {
     today: {
       color: '#00f0ff',
@@ -262,7 +261,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       </div>
 
-      {/* CHRONOLOGICAL GROUPED LIST VIEW WITH BRIGHTNESS HIERARCHY */}
+      {/* CHRONOLOGICAL GROUPED LIST VIEW WITH CARD CONTAINER BACKGROUNDS */}
       {currentView === 'list' && (
         <div className="tasks-list-container" style={{ marginTop: '20px' }}>
           {filteredTasks.length === 0 ? (

@@ -17,7 +17,7 @@ export const useTaskStore = create()(
           rank: 'B',
           xpReward: 500,
           coinReward: 100,
-          status: 'urgent', // 'urgent', 'non_urgent', 'done'
+          status: 'urgent',
           dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
           completedAt: null
         },
@@ -99,18 +99,23 @@ export const useTaskStore = create()(
         const task = tasks.find(t => t.id === taskId);
         if (!task) return null;
 
+        const todayStr = new Date().toISOString().split('T')[0];
         const wasDone = task.status === 'done';
+        const isNowDone = newStatus === 'done';
+
+        // Auto-transfer task to TODAY's date if completed today!
         const updatedTask = {
           ...task,
           status: newStatus,
-          completedAt: newStatus === 'done' ? new Date().toISOString() : null
+          dueDate: isNowDone ? todayStr : task.dueDate,
+          completedAt: isNowDone ? new Date().toISOString() : null
         };
 
         set({
           tasks: tasks.map(t => t.id === taskId ? updatedTask : t)
         });
 
-        return { task: updatedTask, justCompleted: newStatus === 'done' && !wasDone };
+        return { task: updatedTask, justCompleted: isNowDone && !wasDone };
       },
 
       deleteTask: (taskId) => {

@@ -6,7 +6,10 @@ import { sfx } from '../../services/audioService.js';
 export function DailyQuestsPanel({ onShowLevelUp }) {
   const { quests, toggleQuestCompleted, addQuest, deleteQuest } = useDailyQuestStore();
   const { dailyStreak, awardXpAndGold } = usePlayerStore();
+  
   const [newTitle, setNewTitle] = useState('');
+  const [newXp, setNewXp] = useState(100);
+  const [newCoins, setNewCoins] = useState(20);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -24,8 +27,10 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
   const handleAdd = (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    addQuest(newTitle.trim());
+    addQuest(newTitle.trim(), newXp, newCoins);
     setNewTitle('');
+    setNewXp(100);
+    setNewCoins(20);
   };
 
   return (
@@ -44,8 +49,40 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
         </div>
       </div>
 
-      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-        <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="input-system" placeholder="Добавить свой ежедневный квест..." />
+      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          type="text"
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          className="input-system"
+          placeholder="Название нового квеста..."
+          style={{ flexGrow: 1, minWidth: '220px' }}
+        />
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontWeight: 600 }}>XP:</label>
+          <input
+            type="number"
+            value={newXp}
+            onChange={(e) => setNewXp(e.target.value)}
+            className="input-system"
+            style={{ width: '80px', padding: '10px' }}
+            min="1"
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontWeight: 600 }}>🪙 Монеты:</label>
+          <input
+            type="number"
+            value={newCoins}
+            onChange={(e) => setNewCoins(e.target.value)}
+            className="input-system"
+            style={{ width: '80px', padding: '10px' }}
+            min="0"
+          />
+        </div>
+
         <button type="submit" className="btn-system" style={{ whiteSpace: 'nowrap' }}>+ ДОБАВИТЬ</button>
       </form>
 

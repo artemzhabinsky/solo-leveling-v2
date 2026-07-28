@@ -6,7 +6,7 @@ export function SidebarNav({ activeTab, onTabChange, isCollapsed, onToggleCollap
     { id: 'tasks', label: 'Все задачи', icon: Sword },
     { id: 'character', label: 'Профиль персонажа', icon: User },
     { id: 'daily', label: 'Ежедневные квесты', icon: Flame },
-    { id: 'shop', label: 'Магазин наград-хотелки', icon: ShoppingBag },
+    { id: 'shop', label: 'Магазин наград', icon: ShoppingBag },
     { id: 'analytics', label: 'Аналитика', icon: BarChart3 }
   ];
 
