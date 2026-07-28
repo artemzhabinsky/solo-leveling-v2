@@ -7,12 +7,11 @@ export function RewardShopView() {
   const { shopItems, inventory, addShopItem, buyItem, useInventoryItem, deleteInventoryItem, cleanExpiredInventory } = useShopStore();
   const { gold, totalGoldEarned, spendGold } = usePlayerStore();
 
-  const [activeSubTab, setActiveSubTab] = useState('catalog'); // 'catalog' or 'inventory'
+  const [activeSubTab, setActiveSubTab] = useState('catalog');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', price: 150, icon: '🎮' });
   const [nowTime, setNowTime] = useState(Date.now());
 
-  // 1-second interval to update live countdown timers & clean expired items
   useEffect(() => {
     cleanExpiredInventory();
     const timer = setInterval(() => {
@@ -37,7 +36,6 @@ export function RewardShopView() {
     setIsModalOpen(false);
   };
 
-  // Helper to format 24h countdown
   const getRemainingTime = (expiresAtIso) => {
     const diff = new Date(expiresAtIso).getTime() - nowTime;
     if (diff <= 0) return 'Истёк';
@@ -55,12 +53,12 @@ export function RewardShopView() {
       <div className="shop-header-banner" style={{ background: 'linear-gradient(135deg, rgba(20, 15, 40, 0.9), rgba(10, 25, 45, 0.9))', border: 'var(--border-gold)', boxShadow: 'var(--shadow-gold)', padding: '20px 24px', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h2 className="font-system text-gold-glow" style={{ color: 'var(--system-gold)', fontSize: '22px' }}>🛍️ МАГАЗИН НАГРАД-ХОТЕЛКИ</h2>
+            <h2 className="font-system text-gold-glow" style={{ color: 'var(--system-gold)', fontSize: '20px' }}>МАГАЗИН НАГРАД-ХОТЕЛКИ</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px' }}>Обменивайте накопленные золотые монеты на реальные награды и хотелки!</p>
           </div>
           {activeSubTab === 'catalog' && (
             <button onClick={() => setIsModalOpen(true)} className="btn-system btn-gold">
-              <span>➕</span> НОВАЯ НАГРАДА
+              <span>+</span> НОВАЯ НАГРАДА
             </button>
           )}
         </div>
@@ -68,10 +66,10 @@ export function RewardShopView() {
         {/* Sub-Tab Switcher */}
         <div className="view-switcher" style={{ width: 'fit-content', border: '1px solid rgba(255, 215, 0, 0.3)' }}>
           <button onClick={() => setActiveSubTab('catalog')} className={`view-btn ${activeSubTab === 'catalog' ? 'active' : ''}`} style={{ color: activeSubTab === 'catalog' ? 'var(--system-gold)' : undefined }}>
-            🛍️ КАТАЛОГ НАГРАД
+            КАТАЛОГ НАГРАД
           </button>
           <button onClick={() => setActiveSubTab('inventory')} className={`view-btn ${activeSubTab === 'inventory' ? 'active' : ''}`} style={{ color: activeSubTab === 'inventory' ? 'var(--system-gold)' : undefined }}>
-            📦 КУПЛЕННЫЕ НАГРАДЫ ({activeInventory.length})
+            КУПЛЕННЫЕ НАГРАДЫ ({activeInventory.length})
           </button>
         </div>
       </div>
@@ -84,8 +82,8 @@ export function RewardShopView() {
             return (
               <div key={item.id} className="shop-item-card">
                 <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-                  <div style={{ width: '50px', height: '50px', borderRadius: '8px', background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '24px', flexShrink: 0 }}>
-                    {item.icon}
+                  <div className="shop-emoji-box">
+                    <span>{item.icon}</span>
                   </div>
                   <div>
                     <div style={{ fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>{item.title}</div>
@@ -93,11 +91,11 @@ export function RewardShopView() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '14px' }}>
-                  <div style={{ fontFamily: 'var(--font-system)', fontSize: '18px', fontWeight: 800, color: 'var(--system-gold)' }}>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '18px', fontWeight: 800, color: 'var(--system-gold)' }}>
                     🪙 {item.price.toLocaleString()}
                   </div>
                   <button onClick={() => handleBuy(item)} disabled={!canAfford} className="btn-system btn-gold" style={{ opacity: canAfford ? 1 : 0.4 }}>
-                    {canAfford ? '🛒 КУПИТЬ' : '🔒 МАЛО МОНЕТ'}
+                    {canAfford ? 'КУПИТЬ' : 'МАЛО МОНЕТ'}
                   </button>
                 </div>
               </div>
@@ -106,12 +104,12 @@ export function RewardShopView() {
         </div>
       )}
 
-      {/* INVENTORY SUB-TAB (24-HOUR COUNTDOWN & AUTO-DELETE) */}
+      {/* INVENTORY SUB-TAB */}
       {activeSubTab === 'inventory' && (
         <div className="daily-quest-panel" style={{ borderColor: 'var(--system-gold)' }}>
           <div className="daily-quest-header">
             <div className="daily-quest-title" style={{ color: 'var(--system-gold)' }}>
-              📦 КУПЛЕННЫЕ НАГРАДЫ (СГОРАЮТ ЧЕРЕЗ 24 ЧАСА)
+              КУПЛЕННЫЕ НАГРАДЫ (СГОРАЮТ ЧЕРЕЗ 24 ЧАСА)
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
@@ -127,10 +125,12 @@ export function RewardShopView() {
                 return (
                   <div key={inv.id} style={{ background: 'rgba(5, 12, 28, 0.8)', border: '1px solid rgba(255, 215, 0, 0.25)', borderRadius: '8px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                      <span style={{ fontSize: '28px' }}>{inv.icon}</span>
+                      <div className="shop-emoji-box">
+                        <span>{inv.icon}</span>
+                      </div>
                       <div>
                         <div style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '15px' }}>{inv.title}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-system)', marginTop: '3px' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-body)', marginTop: '3px' }}>
                           ⏱️ Осталось времени (24ч): <strong style={{ color: '#ffffff' }}>{timerStr}</strong>
                         </div>
                       </div>
@@ -138,10 +138,10 @@ export function RewardShopView() {
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       {isUsed ? (
-                        <span style={{ color: 'var(--system-green)', fontFamily: 'var(--font-system)', fontSize: '12px', fontWeight: 700 }}>✓ ИСПОЛЬЗОВАНО</span>
+                        <span style={{ color: 'var(--system-green)', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700 }}>ВЫПОЛНЕНО</span>
                       ) : (
                         <button onClick={() => useInventoryItem(inv.id)} className="btn-system btn-gold" style={{ padding: '6px 14px', fontSize: '12px' }}>
-                          ⚡ ИСПОЛЬЗОВАТЬ
+                          ИСПОЛЬЗОВАТЬ
                         </button>
                       )}
                       <button onClick={() => deleteInventoryItem(inv.id)} className="btn-system btn-danger" style={{ padding: '6px 10px', fontSize: '12px' }}>🗑️</button>
@@ -154,18 +154,15 @@ export function RewardShopView() {
         </div>
       )}
 
-      {/* TOTAL COINS EARNED COUNTER AT BOTTOM */}
+      {/* TOTAL COINS EARNED COUNTER */}
       <div style={{ background: 'rgba(5, 12, 28, 0.9)', border: '1px solid rgba(255, 215, 0, 0.3)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '24px' }}>🏆</span>
-          <div>
-            <div style={{ fontFamily: 'var(--font-system)', fontSize: '13px', color: 'var(--system-gold)' }}>СТАТИСТИКА ДОСТИЖЕНИЙ</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Суммарный объем накоплений игрока</div>
-          </div>
+        <div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--system-gold)' }}>СТАТИСТИКА ДОСТИЖЕНИЙ</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Суммарный объем накоплений игрока</div>
         </div>
 
-        <div style={{ fontFamily: 'var(--font-system)', fontSize: '16px', fontWeight: 800, color: '#ffffff' }}>
-          ВСЕГО ЗАРАБОТАНО МОНЕТ ЗА ВСЁ ВРЕМЯ: <span style={{ color: 'var(--system-gold)', fontSize: '20px' }}>🪙 {totalGoldEarned.toLocaleString()}</span>
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: '15px', fontWeight: 700, color: '#ffffff' }}>
+          ВСЕГО ЗАРАБОТАНО МОНЕТ ЗА ВСЁ ВРЕМЯ: <span style={{ color: 'var(--system-gold)', fontSize: '18px', fontWeight: 800 }}>🪙 {totalGoldEarned.toLocaleString()}</span>
         </div>
       </div>
 
@@ -174,30 +171,30 @@ export function RewardShopView() {
         <div className="modal-overlay">
           <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 215, 0, 0.3)', paddingBottom: '12px', marginBottom: '16px' }}>
-              <h2 className="font-system text-gold-glow" style={{ color: 'var(--system-gold)', fontSize: '18px' }}>🎁 ДОБАВИТЬ ХОТЕЛКУ</h2>
+              <h2 className="font-system text-gold-glow" style={{ color: 'var(--system-gold)', fontSize: '18px' }}>ДОБАВИТЬ ХОТЕЛКУ</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '20px', cursor: 'pointer' }}>✕</button>
             </div>
             <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-system)' }}>НАЗВАНИЕ НАГРАДЫ</label>
+                <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-body)' }}>НАЗВАНИЕ НАГРАДЫ</label>
                 <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="input-system" placeholder="Например: Поиграть в PS5..." required style={{ marginTop: '4px' }} />
               </div>
               <div>
-                <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-system)' }}>ОПИСАНИЕ</label>
+                <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-body)' }}>ОПИСАНИЕ</label>
                 <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="input-system" placeholder="Описание..." style={{ marginTop: '4px' }} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-system)' }}>СТОИМОСТЬ 🪙</label>
+                  <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-body)' }}>СТОИМОСТЬ 🪙</label>
                   <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: parseInt(e.target.value, 10) })} className="input-system" min="10" required style={{ marginTop: '4px' }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-system)' }}>ИКОНКА EMOJI</label>
+                  <label style={{ fontSize: '12px', color: 'var(--system-gold)', fontFamily: 'var(--font-body)' }}>ИКОНКА EMOJI</label>
                   <input type="text" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} className="input-system" style={{ marginTop: '4px' }} />
                 </div>
               </div>
               <button type="submit" className="btn-system btn-gold" style={{ marginTop: '10px', width: '100%', justifyContent: 'center' }}>
-                🛍️ ДОБАВИТЬ В МАГАЗИН
+                ДОБАВИТЬ В МАГАЗИН
               </button>
             </form>
           </div>

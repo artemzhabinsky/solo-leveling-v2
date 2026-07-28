@@ -48,20 +48,22 @@ export function AnalyticsView() {
   };
 
   const radarOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
     scales: {
       r: {
         angleLines: { color: 'rgba(0, 240, 255, 0.2)' },
         grid: { color: 'rgba(0, 240, 255, 0.2)' },
-        pointLabels: { color: '#e2f1ff', font: { family: 'Orbitron', size: 11 } },
+        pointLabels: { color: '#e2f1ff', font: { family: 'Inter', size: 12, weight: 'bold' } },
         ticks: { display: false }
       }
     },
     plugins: {
-      legend: { labels: { color: '#e2f1ff', font: { family: 'Inter' } } }
+      legend: { display: false }
     }
   };
 
-  // 2. Line Chart Data (XP over time & Penalty drops)
+  // 2. Line Chart Data (XP over time)
   const last7Logs = analyticsLogs.slice(-7);
   const lineLabels = last7Logs.length > 0 ? last7Logs.map(l => l.date) : ['Сегодня'];
   const lineDataPoints = last7Logs.length > 0 ? last7Logs.map(l => l.xpGained) : [0];
@@ -112,32 +114,32 @@ export function AnalyticsView() {
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
       {/* Radar Chart */}
       <div className="daily-quest-panel">
-        <h3 className="font-system text-glow" style={{ color: 'var(--system-blue)', fontSize: '16px' }}>🕸️ РАДАР ХАРАКТЕРИСТИК (RADAR CHART)</h3>
-        <div style={{ height: '280px', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+        <h3 className="font-system text-glow" style={{ color: 'var(--system-blue)', fontSize: '15px' }}>РАДАР ХАРАКТЕРИСТИК (RADAR CHART)</h3>
+        <div style={{ height: '300px', width: '100%', marginTop: '14px', position: 'relative' }}>
           <Radar data={radarData} options={radarOptions} />
         </div>
       </div>
 
       {/* Donut Chart */}
       <div className="daily-quest-panel">
-        <h3 className="font-system text-glow" style={{ color: 'var(--system-gold)', fontSize: '16px' }}>🍩 ДОЛЯ КАТЕГОРИЙ ЗАДАЧ (DONUT CHART)</h3>
-        <div style={{ height: '280px', display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-          <Doughnut data={donutData} options={{ plugins: { legend: { labels: { color: '#e2f1ff' } } } }} />
+        <h3 className="font-system text-glow" style={{ color: 'var(--system-gold)', fontSize: '15px' }}>ДОЛЯ КАТЕГОРИЙ ЗАДАЧ (DONUT CHART)</h3>
+        <div style={{ height: '300px', width: '100%', marginTop: '14px', position: 'relative' }}>
+          <Doughnut data={donutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#e2f1ff', font: { family: 'Inter' } } } } }} />
         </div>
       </div>
 
       {/* Line Chart */}
       <div className="daily-quest-panel" style={{ gridColumn: '1 / -1' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 className="font-system text-glow" style={{ color: 'var(--system-blue)', fontSize: '16px' }}>📈 ДИНАМИКА НАБОРA ОПЫТА (XP) И СОБЫТИЯ СИСТЕМЫ</h3>
+          <h3 className="font-system text-glow" style={{ color: 'var(--system-blue)', fontSize: '15px' }}>ДИНАМИКА НАБОРA ОПЫТА (XP) И СОБЫТИЯ СИСТЕМЫ</h3>
           {systemEvents.length > 0 && (
-            <span style={{ color: 'var(--system-crimson)', fontFamily: 'var(--font-system)', fontSize: '12px', fontWeight: 700 }}>
-              💀 Зафиксировано штрафов (Deaths): {systemEvents.length}
+            <span style={{ color: 'var(--system-crimson)', fontFamily: 'var(--font-body)', fontSize: '12px', fontWeight: 700 }}>
+              Зафиксировано штрафов (Deaths): {systemEvents.length}
             </span>
           )}
         </div>
-        <div style={{ height: '260px', marginTop: '10px' }}>
-          <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#e2f1ff' } } } }} />
+        <div style={{ height: '280px', marginTop: '14px', position: 'relative' }}>
+          <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#e2f1ff', font: { family: 'Inter' } } } } }} />
         </div>
       </div>
     </div>

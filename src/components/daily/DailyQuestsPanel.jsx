@@ -32,19 +32,21 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
     <div className="daily-quest-panel">
       <div className="daily-quest-header">
         <div>
-          <div className="daily-quest-title">🔥 ЕЖЕДНЕВНЫЙ КВЕСТ: ПОДГОТОВКА СТАТЬ СИЛЬНЕЕ</div>
-          <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+          <div className="daily-quest-title" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--system-blue)' }}>
+            ЕЖЕДНЕВНЫЙ КВЕСТ: ПОДГОТОВКА СТАТЬ СИЛЬНЕЕ
+          </div>
+          <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.5' }}>
             Выполняйте комплекс упражнений для поддержания формы. Пропуск дня снижает здоровье HP!
           </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 42, 95, 0.15)', border: '1px solid var(--system-crimson)', color: 'var(--system-crimson)', padding: '4px 12px', borderRadius: '20px', fontFamily: 'var(--font-system)', fontSize: '13px', fontWeight: '700' }}>
-          ⚡ СЕРИЯ: {dailyStreak} ДНЕЙ
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 42, 95, 0.15)', border: '1px solid var(--system-crimson)', color: 'var(--system-crimson)', padding: '6px 14px', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: '700', marginTop: '12px' }}>
+            СЕРИЯ: {dailyStreak} ДНЕЙ
+          </div>
         </div>
       </div>
 
-      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+      <form onSubmit={handleAdd} style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
         <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="input-system" placeholder="Добавить свой ежедневный квест..." />
-        <button type="submit" className="btn-system" style={{ whiteSpace: 'nowrap' }}>➕ ДОБАВИТЬ</button>
+        <button type="submit" className="btn-system" style={{ whiteSpace: 'nowrap' }}>+ ДОБАВИТЬ</button>
       </form>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
@@ -56,7 +58,7 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
                 {isDoneToday && '✓'}
               </div>
               <div style={{ flexGrow: 1 }}>
-                <div className="task-title">{q.title}</div>
+                <div className="task-title" style={{ fontSize: '15px', fontWeight: 600 }}>{q.title}</div>
               </div>
               <div className="rewards-pill">
                 <span className="xp-gain">+{q.xp} XP</span>

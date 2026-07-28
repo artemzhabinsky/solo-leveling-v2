@@ -30,17 +30,17 @@ export function CharacterProfileView({ onOpenStatus }) {
 
   return (
     <div className="character-chamber-compact">
-      {/* Compact Hero Card with SVG Goblin Avatar */}
+      {/* Compact Hero Card with Large SVG Goblin Avatar */}
       <div className="avatar-hero-card-compact">
-        <div className="avatar-compact-badge" style={{ width: '130px', height: '130px', color: 'var(--system-blue)' }}>
+        <div className="avatar-compact-badge" style={{ width: '165px', height: '165px', color: 'var(--system-blue)' }}>
           <GoblinAvatar level={level} />
         </div>
         <h2 className="avatar-tier-title-compact">{currentStageInfo.title}</h2>
         <div className="avatar-race-tag">{currentStageInfo.race}</div>
 
         {/* HP Hearts Display */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', background: 'rgba(255, 42, 95, 0.1)', border: '1px solid rgba(255, 42, 95, 0.3)', padding: '6px 14px', borderRadius: '20px' }}>
-          <span style={{ fontSize: '12px', fontFamily: 'var(--font-system)', color: 'var(--system-crimson)', fontWeight: 'bold' }}>ЗДОРОВЬЕ HP:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', background: 'rgba(255, 42, 95, 0.1)', border: '1px solid rgba(255, 42, 95, 0.3)', padding: '6px 14px', borderRadius: '20px' }}>
+          <span style={{ fontSize: '12px', fontFamily: 'var(--font-body)', color: 'var(--system-crimson)', fontWeight: 'bold' }}>ЗДОРОВЬЕ HP:</span>
           <div style={{ display: 'flex', gap: '4px', fontSize: '16px' }}>
             {hearts.map((full, idx) => (
               <span key={idx} style={{ opacity: full ? 1 : 0.2, filter: full ? 'drop-shadow(0 0 6px #ff2a5f)' : 'none' }}>
@@ -51,8 +51,8 @@ export function CharacterProfileView({ onOpenStatus }) {
         </div>
 
         {/* Rename Input */}
-        <div style={{ marginTop: '14px', width: '100%' }}>
-          <label style={{ fontSize: '11px', color: 'var(--system-blue)', fontFamily: 'var(--font-system)' }}>ИМЯ ИГРОКА</label>
+        <div style={{ marginTop: '16px', width: '100%' }}>
+          <label style={{ fontSize: '11px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>ИМЯ ИГРОКА</label>
           <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
             <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="input-system" style={{ padding: '8px 12px', fontSize: '13px' }} />
             <button onClick={handleSaveName} className="btn-system" style={{ padding: '6px 12px', fontSize: '12px' }}>💾</button>
@@ -73,7 +73,7 @@ export function CharacterProfileView({ onOpenStatus }) {
           className={`btn-system ${statPoints > 0 ? 'btn-gold' : ''}`}
           style={{ marginTop: '16px', width: '100%', justifyContent: 'center' }}
         >
-          📊 ОКНО СТАТУСА {statPoints > 0 && `(+${statPoints})`}
+          ОКНО СТАТУСА {statPoints > 0 && `(+${statPoints})`}
         </button>
       </div>
 
@@ -81,8 +81,10 @@ export function CharacterProfileView({ onOpenStatus }) {
       <div className="daily-quest-panel">
         <div className="daily-quest-header">
           <div>
-            <div className="daily-quest-title" style={{ color: 'var(--system-blue)', fontSize: '16px' }}>🧬 ДЕРЕВО ЭВОЛЮЦИИ ГОБЛИНА (7 СТАДИЙ)</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+            <div className="daily-quest-title" style={{ color: 'var(--system-blue)', fontSize: '17px', fontWeight: 700 }}>
+              ДЕРЕВО ЭВОЛЮЦИИ ГОБЛИНА (7 СТАДИЙ)
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: '1.5' }}>
               Прогресс мутации от нищего гоблина до Гигачад Монарха 30-го уровня.
             </div>
           </div>
@@ -106,7 +108,7 @@ export function CharacterProfileView({ onOpenStatus }) {
                   </div>
                 </div>
                 <div className="stage-req" style={{ textAlign: 'right', fontSize: '11px' }}>
-                  {isCurrent ? '⭐ ТЕКУЩАЯ ФОРМА' : (isUnlocked ? '✓ РАЗБЛОКИРОВАНО' : `🔒 ТРЕБУЕТСЯ ${st.minLevel} УРОВЕНЬ`)}
+                  {isCurrent ? '★ ТЕКУЩАЯ ФОРМА' : (isUnlocked ? '✓ РАЗБЛОКИРОВАНО' : `🔒 ТРЕБУЕТСЯ ${st.minLevel} УРОВЕНЬ`)}
                 </div>
               </div>
             );
