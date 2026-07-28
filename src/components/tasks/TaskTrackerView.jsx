@@ -26,7 +26,11 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const [editingTask, setEditingTask] = useState(null);
   const [isTodayCompletedModalOpen, setIsTodayCompletedModalOpen] = useState(false);
 
+  // Expanded Subtasks State map: { [taskId]: boolean }
+  const [expandedTasksMap, setExpandedTasksMap] = useState({});
+
   const [newSubtaskInput, setNewSubtaskInput] = useState('');
+  const [cardInlineSubtaskInput, setCardInlineSubtaskInput] = useState({});
 
   const [taskForm, setTaskForm] = useState({
     title: '',
@@ -37,6 +41,25 @@ export function TaskTrackerView({ onShowLevelUp }) {
     dueDate: new Date().toISOString().split('T')[0],
     subtasks: []
   });
+
+  const toggleTaskExpanded = (taskId) => {
+    setExpandedTasksMap(prev => ({ ...prev, [taskId]: !prev[taskId] }));
+  };
+
+  const handleAddInlineSubtask = (task) => {
+    const title = (cardInlineSubtaskInput[task.id] || '').trim();
+    if (!title) return;
+
+    const newSub = { id: 'sub-' + Date.now(), title, completed: false };
+    const updatedSubtasks = [...(task.subtasks || []), newSub];
+    editTask(task.id, { subtasks: updatedSubtasks });
+    setCardInlineSubtaskInput(prev => ({ ...prev, [task.id]: '' }));
+  };
+
+  const handleRemoveInlineSubtask = (task, subId) => {
+    const updatedSubtasks = (task.subtasks || []).filter(s => s.id !== subId);
+    editTask(task.id, { subtasks: updatedSubtasks });
+  };
 
   const filteredTasks = tasks.filter(t => {
     const matchCat = filterCategory === 'all' || t.category === filterCategory;
@@ -88,7 +111,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
     setEditingTask(null);
   };
 
-  // Subtask helper methods for Add/Edit forms
   const handleAddSubtaskToForm = (isEdit = false) => {
     if (!newSubtaskInput.trim()) return;
     const subObj = { id: 'sub-' + Date.now(), title: newSubtaskInput.trim(), completed: false };
@@ -157,35 +179,94 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const todayPlannedCount = filteredTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr).length;
   const todayActualDoneCount = todayTasks.filter(t => t.status === 'done').length;
 
-  const renderSubtasksChecklist = (t) => {
-    if (!t.subtasks || t.subtasks.length === 0) return null;
-
-    const completedSubs = t.subtasks.filter(s => s.completed).length;
-    const totalSubs = t.subtasks.length;
-    const percent = Math.round((completedSubs / totalSubs) * 100);
+  // YouGile-Style Subtasks Tree Renderer (Matching Screenshots 1 & 2)
+  const renderYouGileSubtaskTree = (t) => {
+    const subtasks = t.subtasks || [];
+    const isExpanded = !!expandedTasksMap[t.id];
+    const completedSubs = subtasks.filter(s => s.completed).length;
+    const totalSubs = subtasks.length;
+    const percent = totalSubs > 0 ? Math.round((completedSubs / totalSubs) * 100) : 0;
 
     return (
-      <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(0,240,255,0.1)', width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--system-blue)', fontWeight: 600, marginBottom: '6px' }}>
-          <span>ПОДЗАДАЧИ ({completedSubs}/{totalSubs})</span>
-          <span>{percent}%</span>
+      <div style={{ marginTop: '10px', width: '100%' }}>
+        {/* Toggle Bar / Progress Line (Matching Screenshot 1) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', cursor: 'pointer' }} onClick={() => toggleTaskExpanded(t.id)}>
+          <div style={{ flexGrow: 1, height: '6px', background: 'rgba(5, 12, 30, 0.9)', borderRadius: '4px', overflow: 'hidden' }}>
+            <div style={{ width: `${percent}%`, height: '100%', background: 'var(--system-blue)', transition: 'width 0.3s ease' }}></div>
+          </div>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+            {completedSubs}/{totalSubs}
+          </span>
+          <button
+            type="button"
+            className="btn-sidebar-toggle"
+            style={{ padding: '2px 6px', fontSize: '10px' }}
+            title={isExpanded ? 'Скрыть подзадачи' : 'Раскрыть подзадачи'}
+          >
+            {isExpanded ? '▲' : '▼'}
+          </button>
         </div>
 
-        {/* Subtask Progress Bar */}
-        <div style={{ width: '100%', height: '4px', background: 'rgba(5, 12, 30, 0.8)', borderRadius: '2px', overflow: 'hidden', marginBottom: '8px' }}>
-          <div style={{ width: `${percent}%`, height: '100%', background: 'var(--system-blue)', transition: 'width 0.3s ease' }}></div>
-        </div>
+        {/* Expanded YouGile Tree (Matching Screenshot 2) */}
+        {isExpanded && (
+          <div className="yougile-subtask-tree-container">
+            {subtasks.map(s => (
+              <div key={s.id} className="yougile-subtask-item-card">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexGrow: 1 }}>
+                  <span
+                    onClick={() => toggleSubtask(t.id, s.id)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '50%',
+                      border: '2px solid var(--system-blue)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      color: '#000',
+                      background: s.completed ? 'var(--system-blue)' : 'transparent',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {s.completed && '✓'}
+                  </span>
+                  <span style={{ fontSize: '13px', color: s.completed ? 'var(--text-dim)' : 'var(--text-main)', textDecoration: s.completed ? 'line-through' : 'none' }}>
+                    {s.title}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleRemoveInlineSubtask(t, s.id)}
+                  style={{ background: 'none', border: 'none', color: 'var(--system-crimson)', cursor: 'pointer', fontSize: '12px' }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {t.subtasks.map(s => (
-            <div key={s.id} onClick={(e) => { e.stopPropagation(); toggleSubtask(t.id, s.id); }} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px', color: s.completed ? 'var(--text-dim)' : 'var(--text-main)', textDecoration: s.completed ? 'line-through' : 'none' }}>
-              <span style={{ width: '14px', height: '14px', borderRadius: '3px', border: '1px solid var(--system-blue)', display: 'inline-flex', alignItems: 'center', justifyCenter: 'center', fontSize: '10px', fontWeight: 'bold', color: 'var(--system-blue)', background: s.completed ? 'rgba(0,240,255,0.2)' : 'transparent' }}>
-                {s.completed && '✓'}
-              </span>
-              <span>{s.title}</span>
+            {/* Inline Add Subtask Input (Matching Screenshot 2) */}
+            <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+              <input
+                type="text"
+                value={cardInlineSubtaskInput[t.id] || ''}
+                onChange={(e) => setCardInlineSubtaskInput({ ...cardInlineSubtaskInput, [t.id]: e.target.value })}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddInlineSubtask(t); } }}
+                className="input-system"
+                placeholder="+ Создать подзадачу..."
+                style={{ padding: '6px 10px', fontSize: '12px' }}
+              />
+              <button
+                type="button"
+                onClick={() => handleAddInlineSubtask(t)}
+                className="btn-system"
+                style={{ padding: '6px 10px', fontSize: '11px', whiteSpace: 'nowrap' }}
+              >
+                + Добавить
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -208,7 +289,9 @@ export function TaskTrackerView({ onShowLevelUp }) {
             {cat && <span style={{ color: cat.color, fontWeight: 600 }}>{cat.label}</span>}
             <span>📅 {t.dueDate || 'Без даты'}</span>
           </div>
-          {renderSubtasksChecklist(t)}
+          
+          {/* YouGile Subtask Tree Component */}
+          {renderYouGileSubtaskTree(t)}
         </div>
 
         <div className="rewards-pill">
@@ -366,7 +449,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       )}
 
-      {/* KANBAN VIEW WITH DUE DATE & SUBTASKS */}
+      {/* KANBAN VIEW WITH YOUGILE SUBTASK TREES */}
       {currentView === 'kanban' && (
         <div className="kanban-board-grid" style={{ marginTop: '16px' }}>
           {[
@@ -409,7 +492,8 @@ export function TaskTrackerView({ onShowLevelUp }) {
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📅 {t.dueDate || 'Без даты'}</span>
                       </div>
 
-                      {renderSubtasksChecklist(t)}
+                      {/* YouGile Subtask Tree Component */}
+                      {renderYouGileSubtaskTree(t)}
 
                       <div style={{ display: 'flex', gap: '6px', marginTop: '12px', width: '100%', justifyContent: 'flex-end' }}>
                         <button onClick={() => setEditingTask(t)} className="btn-system" style={{ padding: '4px 8px', fontSize: '11px' }}>✏️ Редактировать</button>
@@ -452,7 +536,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       )}
 
-      {/* CREATE TASK MODAL WITH SUBTASKS CHECKLIST */}
+      {/* CREATE TASK MODAL */}
       {isAddModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -532,7 +616,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       )}
 
-      {/* EDIT TASK POPUP MODAL WITH SUBTASKS CHECKLIST */}
+      {/* EDIT TASK POPUP MODAL */}
       {editingTask && (
         <div className="modal-overlay">
           <div className="modal-content">

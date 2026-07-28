@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDailyQuestStore } from '../../store/useDailyQuestStore.js';
 import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { sfx } from '../../services/audioService.js';
@@ -10,8 +10,33 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
   const [newTitle, setNewTitle] = useState('');
   const [newXp, setNewXp] = useState(100);
   const [newCoins, setNewCoins] = useState(20);
+  const [, setTick] = useState(0);
 
   const todayStr = new Date().toISOString().split('T')[0];
+
+  // 1-second interval for updating countdown timer to midnight 00:00
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick(t => t + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getTimeUntilMidnight = () => {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+
+    const diffMs = midnight.getTime() - now.getTime();
+    if (diffMs <= 0) return '00ч 00мин 00сек';
+
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(hours)}ч ${pad(mins)}мин ${pad(secs)}сек`;
+  };
 
   const handleToggle = (questId) => {
     const result = toggleQuestCompleted(questId);
@@ -90,13 +115,20 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
         {quests.map(q => {
           const isDoneToday = q.lastCompletedDate === todayStr;
           return (
-            <div key={q.id} className={`task-item-card ${isDoneToday ? 'completed' : ''}`} style={{ borderColor: 'rgba(138, 43, 226, 0.3)' }}>
+            <div key={q.id} className={`task-item-card ${isDoneToday ? 'completed' : ''}`} style={{ borderColor: 'rgba(138, 43, 226, 0.3)', flexWrap: 'wrap' }}>
               <div onClick={() => handleToggle(q.id)} className="task-checkbox-custom" style={{ borderColor: 'var(--system-purple)' }}>
                 {isDoneToday && '✓'}
               </div>
-              <div style={{ flexGrow: 1 }}>
+              <div style={{ flexGrow: 1, minWidth: '220px' }}>
                 <div className="task-title" style={{ fontSize: '15px', fontWeight: 600 }}>{q.title}</div>
+                {isDoneToday && (
+                  <div style={{ fontSize: '12px', color: 'var(--system-blue)', fontWeight: 600, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>⏳ Сброс квеста через:</span>
+                    <span style={{ color: 'var(--system-gold)' }}>{getTimeUntilMidnight()} (в 00:00)</span>
+                  </div>
+                )}
               </div>
+
               <div className="rewards-pill">
                 <span className="xp-gain">+{q.xp} XP</span>
                 <span className="gold-gain">+{q.coins} 🪙</span>
