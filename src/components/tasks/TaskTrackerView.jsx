@@ -101,6 +101,77 @@ export function TaskTrackerView({ onShowLevelUp }) {
     }
   };
 
+  // Chronological Grouping Logic for List View (Сегодня, Завтра, На неделе, Потом)
+  const todayStr = new Date().toISOString().split('T')[0];
+  const tomorrowObj = new Date();
+  tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+  const tomorrowStr = tomorrowObj.toISOString().split('T')[0];
+
+  const weekEndObj = new Date();
+  weekEndObj.setDate(weekEndObj.getDate() + 7);
+  const weekEndStr = weekEndObj.toISOString().split('T')[0];
+
+  const todayTasks = filteredTasks.filter(t => !t.dueDate || t.dueDate === todayStr);
+  const tomorrowTasks = filteredTasks.filter(t => t.dueDate === tomorrowStr);
+  const weekTasks = filteredTasks.filter(t => t.dueDate > tomorrowStr && t.dueDate <= weekEndStr);
+  const laterTasks = filteredTasks.filter(t => t.dueDate > weekEndStr);
+
+  const renderTaskCard = (t) => {
+    const cat = CATEGORIES.find(c => c.key === t.category);
+    const isDone = t.status === 'done';
+    return (
+      <div key={t.id} className={`task-item-card ${isDone ? 'completed' : ''}`}>
+        <div onClick={() => handleToggleTask(t.id)} className="task-checkbox-custom">
+          {isDone && '✓'}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className={`rank-badge rank-${t.rank}`} style={{ fontSize: '11px', padding: '2px 8px' }}>{t.rank}-RANK</span>
+            <span className="task-title" style={{ fontSize: '15px', fontWeight: 600 }}>{t.title}</span>
+          </div>
+          {t.description && <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginTop: '2px' }}>{t.description}</div>}
+          <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+            {cat && <span style={{ color: cat.color, fontWeight: 600 }}>{cat.label}</span>}
+            <span>📅 {t.dueDate || 'Без даты'}</span>
+          </div>
+        </div>
+
+        <div className="rewards-pill">
+          <span className="xp-gain">+{t.xpReward} XP</span>
+          <span className="gold-gain">+{t.coinReward} 🪙</span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <button onClick={() => setEditingTask(t)} className="btn-system" style={{ padding: '6px 10px', fontSize: '12px' }} title="Редактировать">✏️</button>
+          <button onClick={() => deleteTask(t.id)} className="btn-system btn-danger" style={{ padding: '6px 10px', fontSize: '12px' }} title="Удалить">🗑️</button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTaskSection = (sectionTitle, sectionTasks, colorHex = 'var(--system-blue)') => {
+    const doneCount = sectionTasks.filter(t => t.status === 'done').length;
+    const totalCount = sectionTasks.length;
+
+    if (totalCount === 0) return null;
+
+    return (
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+          <h3 className="font-system" style={{ color: colorHex, fontSize: '18px', fontWeight: 800, letterSpacing: '1px' }}>
+            {sectionTitle}
+          </h3>
+          <span style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1px solid rgba(0, 240, 255, 0.25)', color: 'var(--text-main)', fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px' }}>
+            {doneCount}/{totalCount}
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {sectionTasks.map(t => renderTaskCard(t))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <div className="task-controls-bar">
@@ -134,44 +205,18 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       </div>
 
-      {/* LIST VIEW */}
+      {/* CHRONOLOGICAL GROUPED LIST VIEW (СЕГОДНЯ, ЗАВТРА, НА НЕДЕЛЕ, ПОТОМ) */}
       {currentView === 'list' && (
-        <div className="tasks-list-container" style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="tasks-list-container" style={{ marginTop: '20px' }}>
           {filteredTasks.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px' }}>Задач не найдено. Нажмите "+ Новая Задача"!</div>
           ) : (
-            filteredTasks.map(t => {
-              const cat = CATEGORIES.find(c => c.key === t.category);
-              const isDone = t.status === 'done';
-              return (
-                <div key={t.id} className={`task-item-card ${isDone ? 'completed' : ''}`}>
-                  <div onClick={() => handleToggleTask(t.id)} className="task-checkbox-custom">
-                    {isDone && '✓'}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className={`rank-badge rank-${t.rank}`} style={{ fontSize: '11px', padding: '2px 8px' }}>{t.rank}-RANK</span>
-                      <span className="task-title" style={{ fontSize: '15px', fontWeight: 600 }}>{t.title}</span>
-                    </div>
-                    {t.description && <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginTop: '2px' }}>{t.description}</div>}
-                    <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                      {cat && <span style={{ color: cat.color, fontWeight: 600 }}>{cat.label}</span>}
-                      <span>📅 {t.dueDate || 'Без даты'}</span>
-                    </div>
-                  </div>
-
-                  <div className="rewards-pill">
-                    <span className="xp-gain">+{t.xpReward} XP</span>
-                    <span className="gold-gain">+{t.coinReward} 🪙</span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => setEditingTask(t)} className="btn-system" style={{ padding: '6px 10px', fontSize: '12px' }} title="Редактировать">✏️</button>
-                    <button onClick={() => deleteTask(t.id)} className="btn-system btn-danger" style={{ padding: '6px 10px', fontSize: '12px' }} title="Удалить">🗑️</button>
-                  </div>
-                </div>
-              );
-            })
+            <>
+              {renderTaskSection('СЕГОДНЯ', todayTasks, '#00f0ff')}
+              {renderTaskSection('ЗАВТРА', tomorrowTasks, '#00e5ff')}
+              {renderTaskSection('НА НЕДЕЛЕ', weekTasks, '#8ab4f8')}
+              {renderTaskSection('ПОТОМ', laterTasks, '#5c78a3')}
+            </>
           )}
         </div>
       )}
