@@ -14,7 +14,7 @@ import Stage7 from '../avatar/stages/Stage7.jsx';
 const STAGE_SVGS = { 1: Stage1, 2: Stage2, 3: Stage3, 4: Stage4, 5: Stage5, 6: Stage6, 7: Stage7 };
 
 export function CharacterProfileView() {
-  const { name, level, stats, hp, setName } = usePlayerStore();
+  const { name, level, stats, hp, totalGoldEarned, setName } = usePlayerStore();
   const [editName, setEditName] = useState(name);
 
   const currentStageNum = getStageForLevel(level);
@@ -48,6 +48,12 @@ export function CharacterProfileView() {
               </span>
             ))}
           </div>
+        </div>
+
+        {/* Total Gold Earned Display */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)', padding: '6px 14px', borderRadius: '20px' }}>
+          <span style={{ fontSize: '12px', fontFamily: 'var(--font-body)', color: 'var(--system-gold)', fontWeight: 'bold' }}>МОНЕТ ЗАРАБОТАНО:</span>
+          <span style={{ fontSize: '13px', color: '#ffffff', fontWeight: 700 }}>🪙 {totalGoldEarned ? totalGoldEarned.toLocaleString() : 0}</span>
         </div>
 
         {/* Rename Input */}

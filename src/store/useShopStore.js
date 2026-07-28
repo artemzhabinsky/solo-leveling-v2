@@ -1,113 +1,86 @@
 /**
- * Shop & 24h Expiring Inventory Store (Zustand)
+ * Shop & Inventory Store (Zustand)
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export const INITIAL_SHOP_ITEMS = [
+  { id: 'shop-1', title: 'Час игр на консоли / ПК', cost: 150, emoji: '🎮', description: 'Заслуженная игровая сессия после хорошей работы.' },
+  { id: 'shop-2', title: 'Вкусный сет пиццы / бургер', cost: 200, emoji: '🍕', description: 'Гастрономический праздник за закрытые задачи.' },
+  { id: 'shop-3', title: 'Просмотр фильма / сериала', cost: 100, emoji: '🎬', description: 'Уютный вечер кинематографа без чувства вины.' },
+  { id: 'shop-4', title: 'Новый гаджет / аксессуар', cost: 1000, emoji: '🎁', description: 'Крупная награда за серьезные свершения.' }
+];
+
 export const useShopStore = create()(
   persist(
     (set, get) => ({
-      shopItems: [
-        {
-          id: 'shop-1',
-          title: '1 Час любимой видеоигры',
-          description: 'Отдохнуть и поиграть без угрызений совести.',
-          icon: '🎮',
-          price: 150
-        },
-        {
-          id: 'shop-2',
-          title: 'Заказать любимую пиццу',
-          description: 'Вкусный ужин за зачистку дневных квестов.',
-          icon: '🍕',
-          price: 400
-        },
-        {
-          id: 'shop-3',
-          title: 'Просмотр фильма / серии сериала',
-          description: 'Расслабляющий вечер за кино.',
-          icon: '🎬',
-          price: 200
-        },
-        {
-          id: 'shop-4',
-          title: 'Покупка новой вещи / Гаджета',
-          description: 'Крупная награда за выполнение A/S-Ранг задач.',
-          icon: '🎁',
-          price: 2000
-        }
-      ],
-      inventory: [
-        {
-          id: 'inv-1',
-          itemId: 'shop-3',
-          title: 'Просмотр фильма / серии сериала',
-          icon: '🎬',
-          purchasedAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
-          usedAt: null,
-          status: 'active'
-        }
-      ],
+      catalog: INITIAL_SHOP_ITEMS,
+      inventory: [], // [{ id, shopItemId, title, cost, emoji, description, purchasedAt, expiresAt }]
+      customRewardTitle: '',
+      customRewardCost: 100,
+      customRewardEmoji: '🎁',
 
-      addShopItem: (itemData) => {
+      setCustomRewardTitle: (val) => set({ customRewardTitle: val }),
+      setCustomRewardCost: (val) => set({ customRewardCost: Number(val) || 50 }),
+      setCustomRewardEmoji: (val) => set({ customRewardEmoji: val }),
+
+      addCustomReward: () => {
+        const { customRewardTitle, customRewardCost, customRewardEmoji, catalog } = get();
+        if (!customRewardTitle.trim()) return;
+
         const newItem = {
-          id: 'shop-' + Date.now(),
-          title: itemData.title,
-          description: itemData.description || '',
-          icon: itemData.icon || '🎁',
-          price: itemData.price
+          id: 'custom-' + Date.now(),
+          title: customRewardTitle.trim(),
+          cost: Math.max(1, customRewardCost),
+          emoji: customRewardEmoji || '🎁',
+          description: 'Пользовательская награда'
         };
-        set((state) => ({ shopItems: [newItem, ...state.shopItems] }));
+
+        set({
+          catalog: [newItem, ...catalog],
+          customRewardTitle: '',
+          customRewardCost: 100,
+          customRewardEmoji: '🎁'
+        });
       },
 
-      buyItem: (item) => {
+      buyReward: (item, spendGoldFn) => {
+        const success = spendGoldFn(item.cost);
+        if (!success) return false;
+
         const now = Date.now();
         const expiresAt = new Date(now + 24 * 3600 * 1000).toISOString();
 
-        const invRecord = {
-          id: 'inv-' + now,
-          itemId: item.id,
+        const purchasedRecord = {
+          id: 'inv-' + Date.now(),
+          shopItemId: item.id,
           title: item.title,
-          icon: item.icon,
-          purchasedAt: new Date(now).toISOString(),
-          expiresAt,
-          usedAt: null,
-          status: 'active'
+          cost: item.cost,
+          emoji: item.emoji,
+          description: item.description,
+          purchasedAt: new Date().toISOString(),
+          expiresAt
         };
 
         set((state) => ({
-          inventory: [invRecord, ...state.inventory]
+          inventory: [purchasedRecord, ...state.inventory]
         }));
 
-        return invRecord;
-      },
-
-      useInventoryItem: (invId) => {
-        const { inventory } = get();
-        const item = inventory.find(i => i.id === invId);
-        if (!item || item.status !== 'active') return false;
-
-        set({
-          inventory: inventory.map(i => i.id === invId ? { ...i, status: 'used', usedAt: new Date().toISOString() } : i)
-        });
         return true;
       },
 
-      deleteInventoryItem: (invId) => {
+      useInventoryItem: (inventoryId) => {
         set((state) => ({
-          inventory: state.inventory.filter(i => i.id !== invId)
+          inventory: state.inventory.filter(item => item.id !== inventoryId)
         }));
       },
 
-      // Auto-deletes expired items after 24 hours!
       cleanExpiredInventory: () => {
         const { inventory } = get();
-        const now = new Date().toISOString();
-        const activeOrValid = inventory.filter(item => item.expiresAt > now);
-
-        if (activeOrValid.length !== inventory.length) {
-          set({ inventory: activeOrValid });
+        const nowIso = new Date().toISOString();
+        const fresh = inventory.filter(item => item.expiresAt > nowIso);
+        if (fresh.length !== inventory.length) {
+          set({ inventory: fresh });
         }
       }
     }),
