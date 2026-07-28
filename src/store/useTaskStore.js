@@ -17,7 +17,7 @@ export const useTaskStore = create()(
           rank: 'B',
           xpReward: 500,
           coinReward: 100,
-          status: 'todo',
+          status: 'urgent', // 'urgent', 'non_urgent', 'done'
           dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
           completedAt: null
         },
@@ -29,7 +29,7 @@ export const useTaskStore = create()(
           rank: 'C',
           xpReward: 250,
           coinReward: 50,
-          status: 'in_progress',
+          status: 'non_urgent',
           dueDate: new Date().toISOString().split('T')[0],
           completedAt: null
         },
@@ -46,7 +46,7 @@ export const useTaskStore = create()(
           completedAt: new Date().toISOString()
         }
       ],
-      currentView: 'list', // 'list', 'kanban', 'calendar'
+      currentView: 'list',
       filterCategory: 'all',
       filterRank: 'all',
       searchQuery: '',
@@ -66,13 +66,32 @@ export const useTaskStore = create()(
           rank: taskData.rank || 'C',
           xpReward: reward.xp,
           coinReward: reward.coins,
-          status: 'todo',
+          status: taskData.status || 'urgent',
           dueDate: taskData.dueDate || new Date().toISOString().split('T')[0],
           completedAt: null
         };
 
         set((state) => ({ tasks: [newTask, ...state.tasks] }));
         return newTask;
+      },
+
+      editTask: (taskId, updatedData) => {
+        const { tasks } = get();
+        const reward = getRewardForRank(updatedData.rank || 'C');
+        
+        set({
+          tasks: tasks.map(t => {
+            if (t.id === taskId) {
+              return {
+                ...t,
+                ...updatedData,
+                xpReward: reward.xp,
+                coinReward: reward.coins
+              };
+            }
+            return t;
+          })
+        });
       },
 
       updateTaskStatus: (taskId, newStatus) => {

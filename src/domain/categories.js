@@ -3,11 +3,11 @@
  */
 
 export const CATEGORIES = [
-  { key: 'physical', attr: 'strength', label: '🏋️ Физика (Сила / STR)', color: '#00ff88' },
-  { key: 'mental', attr: 'intelligence', label: '💻 Учёба/Работа (Интеллект / INT)', color: '#00f0ff' },
-  { key: 'spirit', attr: 'vitality', label: '🏠 Здоровье/Быт (Выносливость / VIT)', color: '#8a2be2' },
-  { key: 'finance', attr: 'goldBonus', label: '💰 Финансы (Золото / GOLD)', color: '#ffd700' },
-  { key: 'discipline', attr: 'sense', label: '🔥 Привычки/Рутина (Восприятие / SEN)', color: '#ff2a5f' }
+  { key: 'physical', attr: 'strength', label: '🏋️ Физика', color: '#00ff88' },
+  { key: 'mental', attr: 'intelligence', label: '💻 Учёба / Работа', color: '#00f0ff' },
+  { key: 'spirit', attr: 'vitality', label: '🏠 Здоровье / Быт', color: '#8a2be2' },
+  { key: 'finance', attr: 'goldBonus', label: '💰 Финансы', color: '#ffd700' },
+  { key: 'discipline', attr: 'sense', label: '🔥 Привычки / Рутина', color: '#ff2a5f' }
 ];
 
 export function getAttrForCategory(categoryKey) {

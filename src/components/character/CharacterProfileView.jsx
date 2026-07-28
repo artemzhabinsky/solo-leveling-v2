@@ -13,8 +13,8 @@ import Stage7 from '../avatar/stages/Stage7.jsx';
 
 const STAGE_SVGS = { 1: Stage1, 2: Stage2, 3: Stage3, 4: Stage4, 5: Stage5, 6: Stage6, 7: Stage7 };
 
-export function CharacterProfileView({ onOpenStatus }) {
-  const { name, level, stats, hp, statPoints, setName } = usePlayerStore();
+export function CharacterProfileView() {
+  const { name, level, stats, hp, setName } = usePlayerStore();
   const [editName, setEditName] = useState(name);
 
   const currentStageNum = getStageForLevel(level);
@@ -59,22 +59,18 @@ export function CharacterProfileView({ onOpenStatus }) {
           </div>
         </div>
 
-        {/* Compact Stats Summary */}
-        <div className="char-stats-summary-grid">
-          <div className="char-stat-item"><span className="lbl">STR (Сила)</span><strong>{stats.strength}</strong></div>
-          <div className="char-stat-item"><span className="lbl">INT (Интеллект)</span><strong>{stats.intelligence}</strong></div>
-          <div className="char-stat-item"><span className="lbl">VIT (Выносливость)</span><strong>{stats.vitality}</strong></div>
-          <div className="char-stat-item"><span className="lbl">SEN (Восприятие)</span><strong>{stats.sense}</strong></div>
+        {/* Compact Stats Summary with Automatic Distribution */}
+        <div style={{ marginTop: '16px', width: '100%' }}>
+          <div style={{ fontSize: '11px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600, textAlign: 'left', marginBottom: '6px' }}>
+            ХАРАКТЕРИСТИКИ ПЕРСОНАЖА (АВТОМАТИЧЕСКИЙ РОСТ)
+          </div>
+          <div className="char-stats-summary-grid" style={{ marginTop: 0 }}>
+            <div className="char-stat-item"><span className="lbl">STR (Сила)</span><strong>{stats.strength}</strong></div>
+            <div className="char-stat-item"><span className="lbl">INT (Интеллект)</span><strong>{stats.intelligence}</strong></div>
+            <div className="char-stat-item"><span className="lbl">VIT (Выносливость)</span><strong>{stats.vitality}</strong></div>
+            <div className="char-stat-item"><span className="lbl">SEN (Восприятие)</span><strong>{stats.sense}</strong></div>
+          </div>
         </div>
-
-        {/* Open Status Allocation Modal Button */}
-        <button
-          onClick={onOpenStatus}
-          className={`btn-system ${statPoints > 0 ? 'btn-gold' : ''}`}
-          style={{ marginTop: '16px', width: '100%', justifyContent: 'center' }}
-        >
-          ОКНО СТАТУСА {statPoints > 0 && `(+${statPoints})`}
-        </button>
       </div>
 
       {/* Evolution Tree Grid */}

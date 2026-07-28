@@ -3,7 +3,6 @@ import { Header } from './components/layout/Header.jsx';
 import { SidebarNav } from './components/layout/SidebarNav.jsx';
 import { BottomTouchbar } from './components/layout/BottomTouchbar.jsx';
 
-import { StatusModal } from './components/modals/StatusModal.jsx';
 import { LevelUpModal } from './components/modals/LevelUpModal.jsx';
 import { PenaltyScreenModal } from './components/modals/PenaltyScreenModal.jsx';
 
@@ -19,7 +18,6 @@ import { sfx } from './services/audioService.js';
 export function App() {
   const [activeTab, setActiveTab] = useState('tasks');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [levelUpData, setLevelUpData] = useState(null);
   const [soundOn, setSoundOn] = useState(true);
 
@@ -54,7 +52,7 @@ export function App() {
         {/* Dynamic Tab Views */}
         <main className="tab-page-container">
           {activeTab === 'tasks' && <TaskTrackerView onShowLevelUp={setLevelUpData} />}
-          {activeTab === 'character' && <CharacterProfileView onOpenStatus={() => setIsStatusOpen(true)} />}
+          {activeTab === 'character' && <CharacterProfileView />}
           {activeTab === 'daily' && <DailyQuestsPanel onShowLevelUp={setLevelUpData} />}
           {activeTab === 'shop' && <RewardShopView />}
           {activeTab === 'analytics' && <AnalyticsView />}
@@ -80,7 +78,6 @@ export function App() {
       <BottomTouchbar activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* System Modals */}
-      <StatusModal isOpen={isStatusOpen} onClose={() => setIsStatusOpen(false)} />
       <LevelUpModal data={levelUpData} onClose={() => setLevelUpData(null)} />
       <PenaltyScreenModal />
     </div>

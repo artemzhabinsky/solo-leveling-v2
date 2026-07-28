@@ -12,9 +12,8 @@ export const usePlayerStore = create()(
       level: 1,
       xp: 0,
       gold: 150,
-      totalGoldEarned: 150, // Total gold earned over all time
-      hp: 3, // 0 to 3
-      statPoints: 5,
+      totalGoldEarned: 150,
+      hp: 3,
       stats: {
         strength: 10,     // STR (Physical)
         intelligence: 10, // INT (Mental)
@@ -30,18 +29,6 @@ export const usePlayerStore = create()(
 
       setName: (newName) => set({ name: newName }),
 
-      allocateStat: (statName) => {
-        const { statPoints, stats } = get();
-        if (statPoints > 0 && stats[statName] !== undefined) {
-          set({
-            statPoints: statPoints - 1,
-            stats: { ...stats, [statName]: stats[statName] + 1 }
-          });
-          return true;
-        }
-        return false;
-      },
-
       awardXpAndGold: (baseXp, baseGold, categoryKey = 'mental') => {
         const state = get();
         const intMult = 1 + (state.stats.intelligence * 0.02);
@@ -56,6 +43,7 @@ export const usePlayerStore = create()(
 
         const xpResult = applyXp(state.level, state.xp, finalXp);
 
+        // Automate Stat Growth based on completed task category!
         const attrMap = {
           physical: 'strength',
           mental: 'intelligence',
@@ -64,7 +52,17 @@ export const usePlayerStore = create()(
           discipline: 'sense'
         };
         const targetAttr = attrMap[categoryKey] || 'intelligence';
-        const updatedStats = { ...state.stats, [targetAttr]: state.stats[targetAttr] + 1 };
+        
+        // If leveled up, boost ALL stats proportionally + boost main category stat!
+        const statBoost = xpResult.levelsGained > 0 ? xpResult.levelsGained : 0;
+        const updatedStats = { ...state.stats };
+        
+        if (statBoost > 0) {
+          Object.keys(updatedStats).forEach(key => {
+            updatedStats[key] += statBoost;
+          });
+        }
+        updatedStats[targetAttr] += 1;
 
         const todayStr = new Date().toISOString().split('T')[0];
         const existingLogs = [...state.analyticsLogs];
@@ -83,7 +81,6 @@ export const usePlayerStore = create()(
           xp: xpResult.xp,
           gold: state.gold + finalGold,
           totalGoldEarned: state.totalGoldEarned + finalGold,
-          statPoints: state.statPoints + (xpResult.levelsGained * 5),
           stats: updatedStats,
           analyticsLogs: existingLogs
         });
@@ -93,8 +90,7 @@ export const usePlayerStore = create()(
           finalGold,
           isCritical,
           leveledUp: xpResult.leveledUp,
-          newLevel: xpResult.level,
-          statPointsGained: xpResult.levelsGained * 5
+          newLevel: xpResult.level
         };
       },
 
@@ -122,8 +118,7 @@ export const usePlayerStore = create()(
           xp: 0,
           gold: 0,
           hp: 3,
-          statPoints: 0,
-          stats: { strength: 0, intelligence: 0, vitality: 0, goldBonus: 0, sense: 0 },
+          stats: { strength: 10, intelligence: 10, vitality: 10, goldBonus: 10, sense: 10 },
           systemEvents: [...state.systemEvents, deathEvent],
           showDeathModal: true
         });
@@ -147,7 +142,6 @@ export const usePlayerStore = create()(
           gold: 150,
           totalGoldEarned: 150,
           hp: 3,
-          statPoints: 5,
           stats: { strength: 10, intelligence: 10, vitality: 10, goldBonus: 10, sense: 10 },
           dailyStreak: 3,
           analyticsLogs: [],
