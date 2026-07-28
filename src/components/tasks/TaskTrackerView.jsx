@@ -11,11 +11,9 @@ export function TaskTrackerView({ onShowLevelUp }) {
     currentView,
     filterCategory,
     filterRank,
-    searchQuery,
     setView,
     setFilterCategory,
     setFilterRank,
-    setSearchQuery,
     addTask,
     editTask,
     updateTaskStatus,
@@ -39,8 +37,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const filteredTasks = tasks.filter(t => {
     const matchCat = filterCategory === 'all' || t.category === filterCategory;
     const matchRank = filterRank === 'all' || t.rank === filterRank;
-    const matchQuery = !searchQuery || t.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchRank && matchQuery;
+    return matchCat && matchRank;
   });
 
   const handleToggleTask = (taskId) => {
@@ -164,7 +161,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const renderTaskSection = (sectionTitle, sectionTasks, styleConfig, customCounterLabel = null) => {
     if (sectionTasks.length === 0) return null;
 
-    // Sorting rule: Active tasks on top; Completed tasks on bottom sorted by completedAt descending (newest completed on top of closed stack)!
     const sortedTasks = [...sectionTasks].sort((a, b) => {
       const aDone = a.status === 'done';
       const bDone = b.status === 'done';
@@ -285,8 +281,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
             <option value="D">D-Rank (Обычный)</option>
             <option value="E">E-Rank (Легкий)</option>
           </select>
-
-          <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="input-system" placeholder="Поиск..." style={{ width: '180px' }} />
         </div>
       </div>
 
@@ -306,7 +300,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
         </div>
       )}
 
-      {/* KANBAN VIEW (3 COLUMNS: URGENT, NON-URGENT, DONE WITH DRAG & DROP) */}
+      {/* KANBAN VIEW WITH DUE DATE DISPLAY & DRAG AND DROP */}
       {currentView === 'kanban' && (
         <div className="kanban-board-grid" style={{ marginTop: '16px' }}>
           {[
@@ -343,7 +337,11 @@ export function TaskTrackerView({ onShowLevelUp }) {
                       </div>
                       
                       <div className="task-title" style={{ marginTop: '8px', fontSize: '14px', fontWeight: 600 }}>{t.title}</div>
-                      {cat && <div style={{ fontSize: '11px', color: cat.color, marginTop: '4px', fontWeight: 600 }}>{cat.label}</div>}
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginTop: '6px' }}>
+                        {cat && <span style={{ fontSize: '11px', color: cat.color, fontWeight: 600 }}>{cat.label}</span>}
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📅 {t.dueDate || 'Без даты'}</span>
+                      </div>
 
                       <div style={{ display: 'flex', gap: '6px', marginTop: '12px', width: '100%', justifyContent: 'flex-end' }}>
                         <button onClick={() => setEditingTask(t)} className="btn-system" style={{ padding: '4px 8px', fontSize: '11px' }}>✏️ Редактировать</button>
