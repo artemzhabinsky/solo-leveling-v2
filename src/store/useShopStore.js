@@ -46,7 +46,7 @@ export const useShopStore = create()(
           purchasedAt: new Date().toISOString(),
           expiresAt: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
           usedAt: null,
-          status: 'active' // 'active', 'used', 'expired'
+          status: 'active'
         }
       ],
 
@@ -94,21 +94,20 @@ export const useShopStore = create()(
         return true;
       },
 
-      updateExpiredItems: () => {
+      deleteInventoryItem: (invId) => {
+        set((state) => ({
+          inventory: state.inventory.filter(i => i.id !== invId)
+        }));
+      },
+
+      // Auto-deletes expired items after 24 hours!
+      cleanExpiredInventory: () => {
         const { inventory } = get();
         const now = new Date().toISOString();
-        let changed = false;
+        const activeOrValid = inventory.filter(item => item.expiresAt > now);
 
-        const updated = inventory.map(item => {
-          if (item.status === 'active' && item.expiresAt < now) {
-            changed = true;
-            return { ...item, status: 'expired' };
-          }
-          return item;
-        });
-
-        if (changed) {
-          set({ inventory: updated });
+        if (activeOrValid.length !== inventory.length) {
+          set({ inventory: activeOrValid });
         }
       }
     }),

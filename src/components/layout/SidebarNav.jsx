@@ -1,13 +1,12 @@
 import React from 'react';
-import { PanelLeftClose, PanelLeft, Sword, User, Flame, ShoppingBag, Package, BarChart3 } from 'lucide-react';
+import { PanelLeftClose, PanelLeft, Sword, User, Flame, ShoppingBag, BarChart3 } from 'lucide-react';
 
 export function SidebarNav({ activeTab, onTabChange, isCollapsed, onToggleCollapse }) {
   const menuItems = [
     { id: 'tasks', label: 'Все задачи', icon: Sword },
     { id: 'character', label: 'Профиль персонажа', icon: User },
     { id: 'daily', label: 'Ежедневные квесты', icon: Flame },
-    { id: 'shop', label: 'Магазин наград', icon: ShoppingBag },
-    { id: 'inventory', label: 'Купленные награды', icon: Package },
+    { id: 'shop', label: 'Магазин наград-хотелки', icon: ShoppingBag },
     { id: 'analytics', label: 'Аналитика', icon: BarChart3 }
   ];
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sword, User, Flame, ShoppingBag, Package, BarChart3 } from 'lucide-react';
+import { Sword, User, Flame, ShoppingBag, BarChart3 } from 'lucide-react';
 
 export function BottomTouchbar({ activeTab, onTabChange }) {
   const menuItems = [
@@ -7,7 +7,6 @@ export function BottomTouchbar({ activeTab, onTabChange }) {
     { id: 'character', label: 'Профиль', icon: User },
     { id: 'daily', label: 'Квесты', icon: Flame },
     { id: 'shop', label: 'Магазин', icon: ShoppingBag },
-    { id: 'inventory', label: 'Награды', icon: Package },
     { id: 'analytics', label: 'Анализ', icon: BarChart3 }
   ];
 

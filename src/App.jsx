@@ -10,7 +10,7 @@ import { PenaltyScreenModal } from './components/modals/PenaltyScreenModal.jsx';
 import { TaskTrackerView } from './components/tasks/TaskTrackerView.jsx';
 import { CharacterProfileView } from './components/character/CharacterProfileView.jsx';
 import { DailyQuestsPanel } from './components/daily/DailyQuestsPanel.jsx';
-import { RewardShopView, InventoryListSection } from './components/shop/RewardShopView.jsx';
+import { RewardShopView } from './components/shop/RewardShopView.jsx';
 import { AnalyticsView } from './components/analytics/AnalyticsView.jsx';
 
 import { usePlayerStore } from './store/usePlayerStore.js';
@@ -57,12 +57,11 @@ export function App() {
           {activeTab === 'character' && <CharacterProfileView onOpenStatus={() => setIsStatusOpen(true)} />}
           {activeTab === 'daily' && <DailyQuestsPanel onShowLevelUp={setLevelUpData} />}
           {activeTab === 'shop' && <RewardShopView />}
-          {activeTab === 'inventory' && <InventoryListSection />}
           {activeTab === 'analytics' && <AnalyticsView />}
         </main>
 
         {/* Footer Toolbar */}
-        <footer className="system-footer-toolbar">
+        <footer className="system-footer-toolbar" style={{ marginTop: '30px', paddingTop: '16px', borderTop: '1px solid rgba(0, 240, 255, 0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button onClick={handleResetData} className="btn-system btn-danger" style={{ padding: '6px 12px', fontSize: '11px' }}>
               🔄 Сбросить Прогресс

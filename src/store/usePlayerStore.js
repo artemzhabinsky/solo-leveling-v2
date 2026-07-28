@@ -3,8 +3,7 @@
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { applyXp, xpRequiredForLevel } from '../domain/xp.js';
-import { getRankTitle } from '../domain/ranks.js';
+import { applyXp } from '../domain/xp.js';
 
 export const usePlayerStore = create()(
   persist(
@@ -13,6 +12,7 @@ export const usePlayerStore = create()(
       level: 1,
       xp: 0,
       gold: 150,
+      totalGoldEarned: 150, // Total gold earned over all time
       hp: 3, // 0 to 3
       statPoints: 5,
       stats: {
@@ -24,8 +24,8 @@ export const usePlayerStore = create()(
       },
       dailyStreak: 3,
       lastHpCheckDate: new Date().toISOString().split('T')[0],
-      analyticsLogs: [], // { date, xpGained, tasksCompleted, categoryBreakdown }
-      systemEvents: [],  // { id, eventType, occurredAt }
+      analyticsLogs: [],
+      systemEvents: [],
       showDeathModal: false,
 
       setName: (newName) => set({ name: newName }),
@@ -56,7 +56,6 @@ export const usePlayerStore = create()(
 
         const xpResult = applyXp(state.level, state.xp, finalXp);
 
-        // Increment attribute matching the task category
         const attrMap = {
           physical: 'strength',
           mental: 'intelligence',
@@ -67,7 +66,6 @@ export const usePlayerStore = create()(
         const targetAttr = attrMap[categoryKey] || 'intelligence';
         const updatedStats = { ...state.stats, [targetAttr]: state.stats[targetAttr] + 1 };
 
-        // Log analytics data
         const todayStr = new Date().toISOString().split('T')[0];
         const existingLogs = [...state.analyticsLogs];
         let todayLog = existingLogs.find(l => l.date === todayStr);
@@ -84,6 +82,7 @@ export const usePlayerStore = create()(
           level: xpResult.level,
           xp: xpResult.xp,
           gold: state.gold + finalGold,
+          totalGoldEarned: state.totalGoldEarned + finalGold,
           statPoints: state.statPoints + (xpResult.levelsGained * 5),
           stats: updatedStats,
           analyticsLogs: existingLogs
@@ -104,7 +103,6 @@ export const usePlayerStore = create()(
         const newHp = Math.max(0, currentHp - amount);
 
         if (newHp === 0) {
-          // Trigger Penalty Reset
           get().triggerDeathReset();
         } else {
           set({ hp: newHp });
@@ -147,6 +145,7 @@ export const usePlayerStore = create()(
           level: 1,
           xp: 0,
           gold: 150,
+          totalGoldEarned: 150,
           hp: 3,
           statPoints: 5,
           stats: { strength: 10, intelligence: 10, vitality: 10, goldBonus: 10, sense: 10 },
