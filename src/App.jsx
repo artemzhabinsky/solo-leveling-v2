@@ -5,6 +5,7 @@ import { BottomTouchbar } from './components/layout/BottomTouchbar.jsx';
 
 import { LevelUpModal } from './components/modals/LevelUpModal.jsx';
 import { PenaltyScreenModal } from './components/modals/PenaltyScreenModal.jsx';
+import { BackupModal } from './components/modals/BackupModal.jsx';
 
 import { TaskTrackerView } from './components/tasks/TaskTrackerView.jsx';
 import { CharacterProfileView } from './components/character/CharacterProfileView.jsx';
@@ -20,6 +21,7 @@ export function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [levelUpData, setLevelUpData] = useState(null);
   const [soundOn, setSoundOn] = useState(true);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
   const { resetProgress } = usePlayerStore();
 
@@ -47,7 +49,7 @@ export function App() {
 
       {/* Main Content Body */}
       <div className="system-main-content">
-        <Header />
+        <Header onOpenBackup={() => setIsBackupModalOpen(true)} />
 
         {/* Dynamic Tab Views */}
         <main className="tab-page-container">
@@ -60,9 +62,12 @@ export function App() {
 
         {/* Footer Toolbar */}
         <footer className="system-footer-toolbar" style={{ marginTop: '30px', paddingTop: '16px', borderTop: '1px solid rgba(0, 240, 255, 0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <button onClick={handleResetData} className="btn-system btn-danger" style={{ padding: '6px 12px', fontSize: '11px' }}>
-              🔄 Сбросить Прогресс
+              🔄 СБРОСИТЬ ПРОГРЕСС
+            </button>
+            <button onClick={() => setIsBackupModalOpen(true)} className="btn-system btn-gold" style={{ padding: '6px 12px', fontSize: '11px' }}>
+              💾 БЭКАП И СОХРАНЕНИЕ
             </button>
           </div>
 
@@ -80,6 +85,7 @@ export function App() {
       {/* System Modals */}
       <LevelUpModal data={levelUpData} onClose={() => setLevelUpData(null)} />
       <PenaltyScreenModal />
+      <BackupModal isOpen={isBackupModalOpen} onClose={() => setIsBackupModalOpen(false)} />
     </div>
   );
 }
