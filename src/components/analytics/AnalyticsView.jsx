@@ -12,14 +12,14 @@ export function AnalyticsView() {
 
   const [unlockedPopupAchievement, setUnlockedPopupAchievement] = useState(null);
 
-  // 1. Radar Chart Axes Calculations (Normalized 0-100)
-  const maxAttrVal = Math.max(stats.strength, stats.intelligence, stats.vitality, stats.goldBonus, stats.sense, 15);
+  // 1. Radar Chart Axes Calculations (Default 0 everywhere if no tasks done)
+  const maxAttrVal = Math.max(stats.strength, stats.intelligence, stats.vitality, stats.goldBonus, stats.sense, 1);
   
-  const strPct = Math.round((stats.strength / maxAttrVal) * 100);
-  const intPct = Math.round((stats.intelligence / maxAttrVal) * 100);
-  const vitPct = Math.round((stats.vitality / maxAttrVal) * 100);
-  const goldPct = Math.round((stats.goldBonus / maxAttrVal) * 100);
-  const discPct = Math.round((stats.sense / maxAttrVal) * 100);
+  const strPct = Math.round(((stats.strength || 0) / maxAttrVal) * 100);
+  const intPct = Math.round(((stats.intelligence || 0) / maxAttrVal) * 100);
+  const vitPct = Math.round(((stats.vitality || 0) / maxAttrVal) * 100);
+  const goldPct = Math.round(((stats.goldBonus || 0) / maxAttrVal) * 100);
+  const discPct = Math.round(((stats.sense || 0) / maxAttrVal) * 100);
 
   // Radar SVG Math (Center 120,120 Radius 80)
   const cx = 120, cy = 120, r = 80;
@@ -54,7 +54,17 @@ export function AnalyticsView() {
     };
   });
 
-  const maxXp7Days = Math.max(...dailyXpData.map(d => d.xp), 500);
+  const maxXp7Days = Math.max(...dailyXpData.map(d => d.xp), 100);
+
+  // SVG Line Chart Coordinate Math
+  const linePoints = dailyXpData.map((d, i) => {
+    const x = 30 + i * 56.6;
+    const y = 95 - (d.xp / maxXp7Days) * 70;
+    return { x, y, ...d };
+  });
+
+  const polylineStr = linePoints.map(p => `${p.x},${p.y}`).join(' ');
+  const areaPolygonStr = `30,105 ${polylineStr} 370,105`;
 
   // Category breakdown for last 7 days
   const catTotals = { physical: 0, mental: 0, spirit: 0, finance: 0, discipline: 0 };
@@ -142,7 +152,7 @@ export function AnalyticsView() {
           АНАЛИТИКА И ДОСТИЖЕНИЯ
         </h1>
         <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginTop: '2px' }}>
-          Распределение характеристик, динамика опыта, штрафы и ачивки.
+          Распределение характеристик, графики набора опыта, штрафы и ачивки.
         </div>
       </div>
 
@@ -193,27 +203,27 @@ export function AnalyticsView() {
               />
 
               {/* Axis Labels & Values */}
-              <text x={cx} y={cy - r - 12} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="middle">STR ({stats.strength})</text>
-              <text x={cx + r + 24} y={cy - 12} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="start">INT ({stats.intelligence})</text>
-              <text x={cx + r - 10} y={cy + r + 18} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="start">VIT ({stats.vitality})</text>
-              <text x={cx - r + 10} y={cy + r + 18} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="end">GOLD ({stats.goldBonus})</text>
-              <text x={cx - r - 24} y={cy - 12} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="end">DISC ({stats.sense})</text>
+              <text x={cx} y={cy - r - 12} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="middle">STR ({stats.strength || 0})</text>
+              <text x={cx + r + 24} y={cy - 12} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="start">INT ({stats.intelligence || 0})</text>
+              <text x={cx + r - 10} y={cy + r + 18} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="start">VIT ({stats.vitality || 0})</text>
+              <text x={cx - r + 10} y={cy + r + 18} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="end">GOLD ({stats.goldBonus || 0})</text>
+              <text x={cx - r - 24} y={cy - 12} fill="#00f0ff" fontSize="11" fontWeight="700" textAnchor="end">DISC ({stats.sense || 0})</text>
             </svg>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', textAlign: 'center', paddingTop: '10px', borderTop: '1px solid rgba(0, 240, 255, 0.15)' }}>
-            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>STR</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.strength}</strong></div>
-            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>INT</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.intelligence}</strong></div>
-            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>VIT</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.vitality}</strong></div>
-            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>GOLD</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.goldBonus}</strong></div>
-            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>DISC</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.sense}</strong></div>
+            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>STR</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.strength || 0}</strong></div>
+            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>INT</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.intelligence || 0}</strong></div>
+            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>VIT</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.vitality || 0}</strong></div>
+            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>GOLD</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.goldBonus || 0}</strong></div>
+            <div><div style={{ fontSize: '10px', color: 'var(--text-dim)' }}>DISC</div><strong style={{ fontSize: '13px', color: '#00ff88' }}>{stats.sense || 0}</strong></div>
           </div>
         </div>
 
         {/* RIGHT COLUMN: 2 Cards (XP Line Chart + Category Donut Chart) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {/* TOP RIGHT CARD: Опыт за 7 дней с Красными Штрафами */}
+          {/* TOP RIGHT CARD: Опыт за 7 дней с Графиком Линии и Красными Штрафами */}
           <div className="task-section-card-container" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
@@ -225,21 +235,53 @@ export function AnalyticsView() {
               </span>
             </div>
 
-            {/* Bar/Line XP Chart */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '10px', height: '140px', paddingTop: '20px', borderBottom: '1px solid rgba(0, 240, 255, 0.15)' }}>
-              {dailyXpData.map((d, idx) => {
-                const heightPct = Math.max(10, Math.round((d.xp / maxXp7Days) * 100));
-                return (
-                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexGrow: 1 }}>
-                    {d.hasPenalty && (
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--system-crimson)', boxShadow: '0 0 8px var(--system-crimson)' }} title="Смертельный сброс HP!"></span>
-                    )}
-                    <span style={{ fontSize: '10px', color: 'var(--system-blue)', fontWeight: 600 }}>{d.xp}</span>
-                    <div style={{ width: '100%', maxWidth: '28px', height: `${heightPct}%`, background: d.hasPenalty ? 'rgba(255, 42, 95, 0.6)' : 'linear-gradient(180deg, #00f0ff, rgba(0, 119, 255, 0.3))', borderRadius: '4px 4px 0 0' }}></div>
-                    <span style={{ fontSize: '10px', color: 'var(--text-dim)', fontWeight: 600 }}>{d.dayName}</span>
-                  </div>
-                );
-              })}
+            {/* Glowing SVG Line Chart (Restored matching Screenshot 1 & 3) */}
+            <div style={{ position: 'relative', width: '100%', height: '160px', marginTop: '10px' }}>
+              <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+                <defs>
+                  <linearGradient id="xpAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00f0ff" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#00f0ff" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Horizontal Grid Lines */}
+                <line x1="20" y1="25" x2="380" y2="25" stroke="rgba(0, 240, 255, 0.1)" strokeDasharray="3 3" />
+                <line x1="20" y1="60" x2="380" y2="60" stroke="rgba(0, 240, 255, 0.1)" strokeDasharray="3 3" />
+                <line x1="20" y1="95" x2="380" y2="95" stroke="rgba(0, 240, 255, 0.1)" />
+
+                {/* Filled Gradient Area */}
+                <polygon points={areaPolygonStr} fill="url(#xpAreaGrad)" />
+
+                {/* Main Glowing XP Line */}
+                <polyline points={polylineStr} fill="none" stroke="#00f0ff" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 6px #00f0ff)' }} />
+
+                {/* Data Points & Values */}
+                {linePoints.map((pt, idx) => (
+                  <g key={idx}>
+                    {/* XP Number Label above node */}
+                    <text x={pt.x} y={pt.y - 10} fill={pt.xp > 0 ? '#00f0ff' : 'var(--text-dim)'} fontSize="11" fontWeight="700" textAnchor="middle">
+                      {pt.xp}
+                    </text>
+
+                    {/* Point Circle */}
+                    <circle
+                      cx={pt.x}
+                      cy={pt.y}
+                      r={pt.hasPenalty ? "6" : "4"}
+                      fill={pt.hasPenalty ? "#ff2a5f" : "#00f0ff"}
+                      stroke="#050a15"
+                      strokeWidth="2"
+                      style={{ filter: pt.hasPenalty ? 'drop-shadow(0 0 8px #ff2a5f)' : 'drop-shadow(0 0 6px #00f0ff)' }}
+                    />
+
+                    {/* Day Label at bottom */}
+                    <text x={pt.x} y="115" fill="var(--text-dim)" fontSize="10" fontWeight="600" textAnchor="middle">
+                      {pt.dayName}
+                    </text>
+                  </g>
+                ))}
+              </svg>
             </div>
           </div>
 

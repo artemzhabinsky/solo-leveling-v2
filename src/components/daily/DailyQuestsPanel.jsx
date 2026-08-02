@@ -5,7 +5,7 @@ import { sfx } from '../../services/audioService.js';
 
 export function DailyQuestsPanel({ onShowLevelUp }) {
   const { quests, toggleQuestCompleted, addQuest, deleteQuest } = useDailyQuestStore();
-  const { dailyStreak, awardXpAndGold } = usePlayerStore();
+  const { dailyStreak, awardXpAndGold, checkMissedDailyQuests } = usePlayerStore();
   
   const [newTitle, setNewTitle] = useState('');
   const [newXp, setNewXp] = useState(100);
@@ -14,8 +14,11 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
 
   const todayStr = new Date().toISOString().split('T')[0];
 
-  // 1-second interval for updating countdown timer to midnight 00:00
+  // Auto-check for missed daily quests & 1-second interval for countdown timer
   useEffect(() => {
+    if (checkMissedDailyQuests) {
+      checkMissedDailyQuests(quests);
+    }
     const timer = setInterval(() => {
       setTick(t => t + 1);
     }, 1000);

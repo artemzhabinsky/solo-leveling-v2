@@ -5,6 +5,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { applyXp } from '../domain/xp.js';
 
+export const DEFAULT_STATS = {
+  strength: 0,     // STR (Physical)
+  intelligence: 0, // INT (Mental)
+  vitality: 0,     // VIT (Spirit)
+  goldBonus: 0,    // GOLD (Finance)
+  sense: 0         // SEN (Discipline)
+};
+
 export const usePlayerStore = create()(
   persist(
     (set, get) => ({
@@ -17,13 +25,7 @@ export const usePlayerStore = create()(
       hasShield: false,
       activeTitle: 'Пробуждённый',
       unlockedTitles: ['Пробуждённый'],
-      stats: {
-        strength: 10,     // STR (Physical)
-        intelligence: 10, // INT (Mental)
-        vitality: 10,     // VIT (Spirit)
-        goldBonus: 10,    // GOLD (Finance)
-        sense: 10         // SEN (Discipline)
-      },
+      stats: { ...DEFAULT_STATS },
       dailyStreak: 3,
       lastHpCheckDate: new Date().toISOString().split('T')[0],
       analyticsLogs: [],
@@ -64,6 +66,36 @@ export const usePlayerStore = create()(
         }
       },
 
+      // Automatic Daily HP Loss Penalty Check for Missed Days
+      checkMissedDailyQuests: (quests = []) => {
+        const state = get();
+        const todayStr = new Date().toISOString().split('T')[0];
+        const lastCheck = state.lastHpCheckDate || todayStr;
+
+        if (lastCheck === todayStr) return;
+
+        const lastDateObj = new Date(lastCheck);
+        const todayObj = new Date(todayStr);
+        const diffDays = Math.floor((todayObj.getTime() - lastDateObj.getTime()) / (1000 * 3600 * 24));
+
+        if (diffDays > 0) {
+          // Check if daily quests were completed yesterday
+          const yesterdayObj = new Date();
+          yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+          const yesterdayStr = yesterdayObj.toISOString().split('T')[0];
+
+          const completedYesterday = quests.some(q => q.lastCompletedDate === yesterdayStr);
+
+          if (!completedYesterday && quests.length > 0) {
+            // Deduct HP for missed days
+            const penaltyHp = Math.min(3, diffDays);
+            get().deductHp(penaltyHp);
+          }
+
+          set({ lastHpCheckDate: todayStr });
+        }
+      },
+
       awardXpAndGold: (baseXp, baseGold, categoryKey = 'mental') => {
         const state = get();
         const intMult = 1 + (state.stats.intelligence * 0.02);
@@ -88,7 +120,6 @@ export const usePlayerStore = create()(
         };
         const targetAttr = attrMap[categoryKey] || 'intelligence';
         
-        // If leveled up, boost ALL stats proportionally + boost main category stat!
         const statBoost = xpResult.levelsGained > 0 ? xpResult.levelsGained : 0;
         const updatedStats = { ...state.stats };
         
@@ -97,7 +128,7 @@ export const usePlayerStore = create()(
             updatedStats[key] += statBoost;
           });
         }
-        updatedStats[targetAttr] += 1;
+        updatedStats[targetAttr] = (updatedStats[targetAttr] || 0) + 1;
 
         const todayStr = new Date().toISOString().split('T')[0];
         const existingLogs = [...state.analyticsLogs];
@@ -161,7 +192,7 @@ export const usePlayerStore = create()(
           gold: 0,
           hp: 3,
           hasShield: false,
-          stats: { strength: 10, intelligence: 10, vitality: 10, goldBonus: 10, sense: 10 },
+          stats: { ...DEFAULT_STATS },
           systemEvents: [...state.systemEvents, deathEvent],
           showDeathModal: true
         });
@@ -188,7 +219,7 @@ export const usePlayerStore = create()(
           hasShield: false,
           activeTitle: 'Пробуждённый',
           unlockedTitles: ['Пробуждённый'],
-          stats: { strength: 10, intelligence: 10, vitality: 10, goldBonus: 10, sense: 10 },
+          stats: { ...DEFAULT_STATS },
           dailyStreak: 3,
           analyticsLogs: [],
           systemEvents: []
@@ -196,7 +227,7 @@ export const usePlayerStore = create()(
       }
     }),
     {
-      name: 'SOLO_LEVELING_PLAYER_STORE'
+      name: 'SOLO_LEVELING_PLAYER_STORE_V2'
     }
   )
 );
