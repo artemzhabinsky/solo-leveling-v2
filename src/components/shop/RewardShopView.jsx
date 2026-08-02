@@ -20,7 +20,7 @@ export function RewardShopView() {
     cleanExpiredInventory
   } = useShopStore();
 
-  const { gold, totalGoldEarned, spendGold } = usePlayerStore();
+  const { gold, totalGoldEarned, spendGold, healHp, activateShield, hasShield, hp } = usePlayerStore();
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [, setTick] = useState(0);
 
@@ -45,8 +45,33 @@ export function RewardShopView() {
     }
   };
 
-  const handleUseItem = (inventoryId) => {
-    useInventoryItem(inventoryId);
+  const handleUseItem = (invItem) => {
+    if (invItem.isPotion) {
+      if (invItem.potionType === 'heal_hp') {
+        if (hp >= 3) {
+          alert('❤️ У вас уже максимальное количество здоровья (3/3 HP)! Зелье пока не требуется.');
+          return;
+        }
+        healHp(1);
+        useInventoryItem(invItem.id);
+        sfx.playLevelUp();
+        alert('🧪 Зелье использовано! Восстановлено +1 HP!');
+        return;
+      }
+      if (invItem.potionType === 'shield') {
+        if (hasShield) {
+          alert('🛡️ У вас уже активен «Щит от Прокрастинации»!');
+          return;
+        }
+        activateShield();
+        useInventoryItem(invItem.id);
+        sfx.playLevelUp();
+        alert('🛡️ «Щит от Прокрастинации» успешно активирован!');
+        return;
+      }
+    }
+
+    useInventoryItem(invItem.id);
     sfx.playQuestComplete();
   };
 
@@ -57,7 +82,6 @@ export function RewardShopView() {
     setIsCustomModalOpen(false);
   };
 
-  // Helper to format remaining 24-hour countdown timer
   const formatTimeLeft = (expiresAtIso) => {
     const diffMs = new Date(expiresAtIso).getTime() - Date.now();
     if (diffMs <= 0) return 'Истёк';
@@ -71,23 +95,23 @@ export function RewardShopView() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Header Banner with Clean Title without Typos */}
+      {/* Header Banner with Clean Title */}
       <div style={{ borderBottom: '1px solid rgba(255, 215, 0, 0.2)', paddingBottom: '12px' }}>
         <div style={{ fontSize: '11px', color: 'var(--system-gold)', fontFamily: 'var(--font-orbitron)', letterSpacing: '2px', fontWeight: 700 }}>
           ◆ ОБМЕН МОНЕТ
         </div>
         <h1 className="font-orbitron text-gold-glow" style={{ fontSize: '28px', color: '#ffffff', letterSpacing: '1px', marginTop: '4px' }}>
-          МАГАЗИН НАГРАД
+          МАГАЗИН НАГРАД И БУСТОВ
         </h1>
         <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginTop: '2px' }}>
-          Награды стоят монет, а монеты падают только с закрытых задач. Купленное живёт 24 часа.
+          Покупайте реальные награды и системные бусты за заработанные монеты.
         </div>
       </div>
 
       {/* Side-by-Side Layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'stretch' }}>
         
-        {/* LEFT COLUMN: Каталог Наград с кнопками удаления */}
+        {/* LEFT COLUMN: Каталог Наград */}
         <div className="task-section-card-container" style={{ borderColor: 'rgba(255, 215, 0, 0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 className="font-orbitron" style={{ color: '#ffffff', fontSize: '18px' }}>Каталог наград</h3>
@@ -103,8 +127,8 @@ export function RewardShopView() {
               catalog.map(item => {
                 const canAfford = gold >= item.cost;
                 return (
-                  <div key={item.id} className="task-item-card" style={{ borderColor: 'rgba(255, 215, 0, 0.2)' }}>
-                    <div className="shop-emoji-box">
+                  <div key={item.id} className="task-item-card" style={{ borderColor: item.isPotion ? 'rgba(0, 240, 255, 0.4)' : 'rgba(255, 215, 0, 0.2)' }}>
+                    <div className="shop-emoji-box" style={{ background: item.isPotion ? 'rgba(0, 240, 255, 0.15)' : 'rgba(255, 215, 0, 0.1)' }}>
                       {item.emoji}
                     </div>
 
@@ -123,14 +147,16 @@ export function RewardShopView() {
                         🪙 {item.cost}
                       </button>
 
-                      <button
-                        onClick={() => deleteCatalogItem(item.id)}
-                        className="btn-system btn-danger"
-                        style={{ padding: '6px 8px', fontSize: '12px' }}
-                        title="Удалить награду"
-                      >
-                        🗑️
-                      </button>
+                      {!item.isPotion && (
+                        <button
+                          onClick={() => deleteCatalogItem(item.id)}
+                          className="btn-system btn-danger"
+                          style={{ padding: '6px 8px', fontSize: '12px' }}
+                          title="Удалить награду"
+                        >
+                          🗑️
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -139,7 +165,7 @@ export function RewardShopView() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Инвентарь с двухстрочным таймером */}
+        {/* RIGHT COLUMN: Инвентарь */}
         <div className="task-section-card-container" style={{ borderColor: 'rgba(0, 240, 255, 0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 className="font-orbitron" style={{ color: '#ffffff', fontSize: '18px' }}>Инвентарь</h3>
@@ -163,7 +189,6 @@ export function RewardShopView() {
                   <div style={{ flexGrow: 1 }}>
                     <div className="task-title" style={{ fontSize: '15px', fontWeight: 600 }}>{invItem.title}</div>
                     
-                    {/* Two-Line Timer Display preventing layout overflow */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
                       <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>⏳ Сгорит через:</span>
                       <span style={{ fontSize: '12px', color: 'var(--system-crimson)', fontWeight: 700, fontFamily: 'var(--font-body)' }}>
@@ -173,7 +198,7 @@ export function RewardShopView() {
                   </div>
 
                   <button
-                    onClick={() => handleUseItem(invItem.id)}
+                    onClick={() => handleUseItem(invItem)}
                     className="btn-system"
                     style={{ background: 'rgba(0, 255, 136, 0.15)', borderColor: '#00ff88', color: '#00ff88', fontSize: '12px', whiteSpace: 'nowrap' }}
                   >

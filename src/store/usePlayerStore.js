@@ -14,6 +14,9 @@ export const usePlayerStore = create()(
       gold: 150,
       totalGoldEarned: 150,
       hp: 3,
+      hasShield: false,
+      activeTitle: 'Пробуждённый',
+      unlockedTitles: ['Пробуждённый'],
       stats: {
         strength: 10,     // STR (Physical)
         intelligence: 10, // INT (Mental)
@@ -28,6 +31,38 @@ export const usePlayerStore = create()(
       showDeathModal: false,
 
       setName: (newName) => set({ name: newName }),
+
+      healHp: (amount = 1) => {
+        const currentHp = get().hp;
+        if (currentHp >= 3) return false;
+        set({ hp: Math.min(3, currentHp + amount) });
+        return true;
+      },
+
+      activateShield: () => set({ hasShield: true }),
+
+      consumeShield: () => {
+        const { hasShield } = get();
+        if (hasShield) {
+          set({ hasShield: false });
+          return true;
+        }
+        return false;
+      },
+
+      equipTitle: (titleStr) => {
+        const { unlockedTitles } = get();
+        if (unlockedTitles.includes(titleStr)) {
+          set({ activeTitle: titleStr });
+        }
+      },
+
+      unlockTitle: (titleStr) => {
+        const { unlockedTitles } = get();
+        if (!unlockedTitles.includes(titleStr)) {
+          set({ unlockedTitles: [...unlockedTitles, titleStr] });
+        }
+      },
 
       awardXpAndGold: (baseXp, baseGold, categoryKey = 'mental') => {
         const state = get();
@@ -95,7 +130,14 @@ export const usePlayerStore = create()(
       },
 
       deductHp: (amount = 1) => {
-        const currentHp = get().hp;
+        const state = get();
+        if (state.hasShield) {
+          state.consumeShield();
+          alert('🛡️ «Щит от Прокрастинации» сработал! Потеря HP заблокирована.');
+          return;
+        }
+
+        const currentHp = state.hp;
         const newHp = Math.max(0, currentHp - amount);
 
         if (newHp === 0) {
@@ -118,6 +160,7 @@ export const usePlayerStore = create()(
           xp: 0,
           gold: 0,
           hp: 3,
+          hasShield: false,
           stats: { strength: 10, intelligence: 10, vitality: 10, goldBonus: 10, sense: 10 },
           systemEvents: [...state.systemEvents, deathEvent],
           showDeathModal: true
@@ -142,6 +185,9 @@ export const usePlayerStore = create()(
           gold: 150,
           totalGoldEarned: 150,
           hp: 3,
+          hasShield: false,
+          activeTitle: 'Пробуждённый',
+          unlockedTitles: ['Пробуждённый'],
           stats: { strength: 10, intelligence: 10, vitality: 10, goldBonus: 10, sense: 10 },
           dailyStreak: 3,
           analyticsLogs: [],

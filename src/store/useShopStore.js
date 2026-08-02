@@ -5,6 +5,24 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export const INITIAL_SHOP_ITEMS = [
+  {
+    id: 'potion-hp',
+    title: 'Зелье Восстановления HP',
+    cost: 1000,
+    emoji: '🧪',
+    description: 'Восстанавливает 1 сгоревшую жизнь HP (максимум 3/3 HP).',
+    isPotion: true,
+    potionType: 'heal_hp'
+  },
+  {
+    id: 'potion-shield',
+    title: 'Щит от Прокрастинации',
+    cost: 1000,
+    emoji: '🛡️',
+    description: 'Заслоняет от потери HP, если вы случайно пропустите ежедневный квест.',
+    isPotion: true,
+    potionType: 'shield'
+  },
   { id: 'shop-1', title: 'Час игр на консоли / ПК', cost: 150, emoji: '🎮', description: 'Заслуженная игровая сессия после хорошей работы.' },
   { id: 'shop-2', title: 'Вкусный сет пиццы / бургер', cost: 200, emoji: '🍕', description: 'Гастрономический праздник за закрытые задачи.' },
   { id: 'shop-3', title: 'Просмотр фильма / сериала', cost: 100, emoji: '🎬', description: 'Уютный вечер кинематографа без чувства вины.' },
@@ -65,7 +83,9 @@ export const useShopStore = create()(
           emoji: item.emoji,
           description: item.description,
           purchasedAt: new Date().toISOString(),
-          expiresAt
+          expiresAt,
+          isPotion: item.isPotion || false,
+          potionType: item.potionType || null
         };
 
         set((state) => ({

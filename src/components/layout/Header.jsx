@@ -5,7 +5,7 @@ import { getRankTitle } from '../../domain/ranks.js';
 import { xpRequiredForLevel } from '../../domain/xp.js';
 
 export function Header() {
-  const { name, level, xp, gold } = usePlayerStore();
+  const { name, level, xp, gold, activeTitle, hasShield } = usePlayerStore();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
 
   const rankInfo = getRankTitle(level);
@@ -21,7 +21,19 @@ export function Header() {
               {rankInfo.rankCode}-RANK
             </div>
             <div className="player-info-meta">
-              <div className="player-name">{name}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="player-name">{name}</span>
+                {activeTitle && (
+                  <span style={{ fontSize: '11px', color: 'var(--system-gold)', background: 'rgba(255, 215, 0, 0.15)', border: '1px solid rgba(255, 215, 0, 0.4)', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>
+                    «{activeTitle}»
+                  </span>
+                )}
+                {hasShield && (
+                  <span style={{ fontSize: '11px', color: 'var(--system-blue)', background: 'rgba(0, 240, 255, 0.15)', border: '1px solid var(--system-blue)', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>
+                    🛡️ ЩИТ
+                  </span>
+                )}
+              </div>
               <div className="player-title">{rankInfo.title}</div>
             </div>
           </div>
