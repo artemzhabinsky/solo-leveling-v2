@@ -3,10 +3,12 @@ import { ChevronUp, ChevronDown } from 'lucide-react';
 import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { getRankTitle } from '../../domain/ranks.js';
 import { xpRequiredForLevel } from '../../domain/xp.js';
+import { BackupModal } from '../modals/BackupModal.jsx';
 
 export function Header() {
   const { name, level, xp, gold, activeTitle, hasShield } = usePlayerStore();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
   const rankInfo = getRankTitle(level);
   const reqXp = xpRequiredForLevel(level);
@@ -49,12 +51,22 @@ export function Header() {
             </div>
           </div>
 
-          {/* Gold Balance & Hide Toggle */}
+          {/* Gold Balance & Backup Toggle */}
           <div className="stats-summary">
             <div className="currency-badge">
               <span>🪙</span>
               <span>{gold.toLocaleString()}</span>
             </div>
+
+            <button
+              onClick={() => setIsBackupModalOpen(true)}
+              className="btn-system btn-gold"
+              style={{ padding: '6px 12px', fontSize: '11px' }}
+              title="Бэкап и сохранение"
+            >
+              💾 БЭКАП
+            </button>
+
             <button
               onClick={() => setIsHeaderHidden(true)}
               className="btn-sidebar-toggle"
@@ -78,6 +90,11 @@ export function Header() {
           </button>
         </div>
       )}
+
+      <BackupModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+      />
     </div>
   );
 }
