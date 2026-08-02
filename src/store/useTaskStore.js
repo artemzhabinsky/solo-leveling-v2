@@ -18,8 +18,8 @@ export const useTaskStore = create()(
           xpReward: 1000,
           coinReward: 200,
           status: 'urgent',
-          dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-          originalDueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+          dueDate: new Date().toISOString().split('T')[0],
+          originalDueDate: new Date().toISOString().split('T')[0],
           completedAt: null,
           subtasks: [
             { id: 'sub-1', title: 'Проверить состояние стора Zustand', completed: true },
@@ -68,6 +68,29 @@ export const useTaskStore = create()(
       setFilterCategory: (cat) => set({ filterCategory: cat }),
       setFilterRank: (rank) => set({ filterRank: rank }),
       setSearchQuery: (query) => set({ searchQuery: query }),
+
+      // Automatic Rollover for Overdue Unfinished Tasks to Today's Date
+      rolloverOverdueTasks: () => {
+        const { tasks } = get();
+        const todayStr = new Date().toISOString().split('T')[0];
+        let changed = false;
+
+        const nextTasks = tasks.map(t => {
+          if (t.status !== 'done' && t.dueDate && t.dueDate < todayStr) {
+            changed = true;
+            return {
+              ...t,
+              originalDueDate: t.originalDueDate || t.dueDate,
+              dueDate: todayStr
+            };
+          }
+          return t;
+        });
+
+        if (changed) {
+          set({ tasks: nextTasks });
+        }
+      },
 
       addTask: (taskData) => {
         const reward = getRewardForRank(taskData.rank || 'C');
@@ -162,7 +185,10 @@ export const useTaskStore = create()(
       }
     }),
     {
-      name: 'SOLO_LEVELING_TASKS_STORE'
+      name: 'SOLO_LEVELING_TASKS_STORE_V2',
+      onRehydrateStorage: () => (state) => {
+        if (state) state.rolloverOverdueTasks();
+      }
     }
   )
 );

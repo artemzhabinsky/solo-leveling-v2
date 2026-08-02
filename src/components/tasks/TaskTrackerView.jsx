@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTaskStore } from '../../store/useTaskStore.js';
 import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { CATEGORIES } from '../../domain/categories.js';
@@ -18,7 +18,8 @@ export function TaskTrackerView({ onShowLevelUp }) {
     editTask,
     toggleSubtask,
     updateTaskStatus,
-    deleteTask
+    deleteTask,
+    rolloverOverdueTasks
   } = useTaskStore();
   const { awardXpAndGold } = usePlayerStore();
 
@@ -41,6 +42,13 @@ export function TaskTrackerView({ onShowLevelUp }) {
     dueDate: new Date().toISOString().split('T')[0],
     subtasks: []
   });
+
+  // Auto-rollover overdue tasks to today's date when TaskTrackerView mounts
+  useEffect(() => {
+    if (rolloverOverdueTasks) {
+      rolloverOverdueTasks();
+    }
+  }, []);
 
   const toggleTaskExpanded = (taskId) => {
     setExpandedTasksMap(prev => ({ ...prev, [taskId]: !prev[taskId] }));
@@ -171,7 +179,8 @@ export function TaskTrackerView({ onShowLevelUp }) {
   weekEndObj.setDate(weekEndObj.getDate() + 7);
   const weekEndStr = weekEndObj.toISOString().split('T')[0];
 
-  const todayTasks = filteredTasks.filter(t => !t.dueDate || t.dueDate === todayStr);
+  // Any task with dueDate <= todayStr automatically belongs to TODAY section
+  const todayTasks = filteredTasks.filter(t => !t.dueDate || t.dueDate <= todayStr);
   const tomorrowTasks = filteredTasks.filter(t => t.dueDate === tomorrowStr);
   const weekTasks = filteredTasks.filter(t => t.dueDate > tomorrowStr && t.dueDate <= weekEndStr);
   const laterTasks = filteredTasks.filter(t => t.dueDate > weekEndStr);
@@ -179,7 +188,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
   const todayPlannedCount = filteredTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr).length;
   const todayActualDoneCount = todayTasks.filter(t => t.status === 'done').length;
 
-  // YouGile-Style Subtasks Tree Renderer (Matching Screenshots 1 & 2)
   const renderYouGileSubtaskTree = (t) => {
     const subtasks = t.subtasks || [];
     const isExpanded = !!expandedTasksMap[t.id];
@@ -189,7 +197,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
 
     return (
       <div style={{ marginTop: '10px', width: '100%' }}>
-        {/* Toggle Bar / Progress Line (Matching Screenshot 1) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', cursor: 'pointer' }} onClick={() => toggleTaskExpanded(t.id)}>
           <div style={{ flexGrow: 1, height: '6px', background: 'rgba(5, 12, 30, 0.9)', borderRadius: '4px', overflow: 'hidden' }}>
             <div style={{ width: `${percent}%`, height: '100%', background: 'var(--system-blue)', transition: 'width 0.3s ease' }}></div>
@@ -207,7 +214,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
           </button>
         </div>
 
-        {/* Expanded YouGile Tree (Matching Screenshot 2) */}
         {isExpanded && (
           <div className="yougile-subtask-tree-container">
             {subtasks.map(s => (
@@ -245,7 +251,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
               </div>
             ))}
 
-            {/* Inline Add Subtask Input (Matching Screenshot 2) */}
             <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
               <input
                 type="text"
@@ -290,7 +295,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
             <span>📅 {t.dueDate || 'Без даты'}</span>
           </div>
           
-          {/* YouGile Subtask Tree Component */}
           {renderYouGileSubtaskTree(t)}
         </div>
 
@@ -492,7 +496,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
                         <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>📅 {t.dueDate || 'Без даты'}</span>
                       </div>
 
-                      {/* YouGile Subtask Tree Component */}
                       {renderYouGileSubtaskTree(t)}
 
                       <div style={{ display: 'flex', gap: '6px', marginTop: '12px', width: '100%', justifyContent: 'flex-end' }}>
@@ -556,7 +559,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
                 <textarea value={taskForm.description} onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })} className="textarea-system" rows="2" placeholder="Подробное описание..." style={{ marginTop: '4px' }}></textarea>
               </div>
 
-              {/* Subtasks Adding Interface */}
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>ПОДЗАДАЧИ (ЧЕК-ЛИСТ)</label>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
@@ -636,7 +638,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
                 <textarea value={editingTask.description || ''} onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })} className="textarea-system" rows="2" style={{ marginTop: '4px' }}></textarea>
               </div>
 
-              {/* Subtasks Editing Interface */}
               <div>
                 <label style={{ fontSize: '12px', color: 'var(--system-blue)', fontFamily: 'var(--font-body)', fontWeight: 600 }}>ПОДЗАДАЧИ (ЧЕК-ЛИСТ)</label>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
