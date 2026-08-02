@@ -4,7 +4,7 @@ import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { getRankTitle } from '../../domain/ranks.js';
 import { xpRequiredForLevel } from '../../domain/xp.js';
 
-export function Header({ onOpenBackup }) {
+export function Header() {
   const { name, level, xp, gold, activeTitle, hasShield } = usePlayerStore();
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
 
@@ -49,23 +49,12 @@ export function Header({ onOpenBackup }) {
             </div>
           </div>
 
-          {/* Gold Balance & Backup Toggle */}
+          {/* Gold Balance & Hide Toggle */}
           <div className="stats-summary">
             <div className="currency-badge">
               <span>🪙</span>
               <span>{gold.toLocaleString()}</span>
             </div>
-
-            {onOpenBackup && (
-              <button
-                onClick={onOpenBackup}
-                className="btn-system btn-gold"
-                style={{ padding: '6px 12px', fontSize: '11px' }}
-                title="Бэкап и сохранение"
-              >
-                💾 БЭКАП
-              </button>
-            )}
 
             <button
               onClick={() => setIsHeaderHidden(true)}
