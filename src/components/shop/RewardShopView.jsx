@@ -17,15 +17,19 @@ export function RewardShopView() {
     deleteCatalogItem,
     buyReward,
     useInventoryItem,
-    cleanExpiredInventory
+    cleanExpiredInventory,
+    ensurePotionsInCatalog
   } = useShopStore();
 
   const { gold, totalGoldEarned, spendGold, healHp, activateShield, hasShield, hp } = usePlayerStore();
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [, setTick] = useState(0);
 
-  // 1-second interval to update remaining 24-hour countdown timers & clean expired items
+  // Auto-migrate catalog state to ensure potions exist & run 1s countdown timer
   useEffect(() => {
+    if (ensurePotionsInCatalog) {
+      ensurePotionsInCatalog();
+    }
     cleanExpiredInventory();
     const interval = setInterval(() => {
       cleanExpiredInventory();

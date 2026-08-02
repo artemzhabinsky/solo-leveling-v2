@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const INITIAL_SHOP_ITEMS = [
+export const POTION_ITEMS = [
   {
     id: 'potion-hp',
     title: 'Зелье Восстановления HP',
@@ -22,7 +22,11 @@ export const INITIAL_SHOP_ITEMS = [
     description: 'Заслоняет от потери HP, если вы случайно пропустите ежедневный квест.',
     isPotion: true,
     potionType: 'shield'
-  },
+  }
+];
+
+export const INITIAL_SHOP_ITEMS = [
+  ...POTION_ITEMS,
   { id: 'shop-1', title: 'Час игр на консоли / ПК', cost: 150, emoji: '🎮', description: 'Заслуженная игровая сессия после хорошей работы.' },
   { id: 'shop-2', title: 'Вкусный сет пиццы / бургер', cost: 200, emoji: '🍕', description: 'Гастрономический праздник за закрытые задачи.' },
   { id: 'shop-3', title: 'Просмотр фильма / сериала', cost: 100, emoji: '🎬', description: 'Уютный вечер кинематографа без чувства вины.' },
@@ -37,6 +41,17 @@ export const useShopStore = create()(
       customRewardTitle: '',
       customRewardCost: 100,
       customRewardEmoji: '🎁',
+
+      ensurePotionsInCatalog: () => {
+        const { catalog } = get();
+        const hasHp = catalog.some(i => i.id === 'potion-hp');
+        const hasShield = catalog.some(i => i.id === 'potion-shield');
+
+        if (!hasHp || !hasShield) {
+          const missingPotions = POTION_ITEMS.filter(p => !catalog.some(i => i.id === p.id));
+          set({ catalog: [...missingPotions, ...catalog] });
+        }
+      },
 
       setCustomRewardTitle: (val) => set({ customRewardTitle: val }),
       setCustomRewardCost: (val) => set({ customRewardCost: Number(val) || 50 }),
@@ -111,7 +126,10 @@ export const useShopStore = create()(
       }
     }),
     {
-      name: 'SOLO_LEVELING_SHOP_STORE'
+      name: 'SOLO_LEVELING_SHOP_STORE_V2', // Bump key to SOLO_LEVELING_SHOP_STORE_V2 so fresh defaults load immediately for all users!
+      onRehydrateStorage: () => (state) => {
+        if (state) state.ensurePotionsInCatalog();
+      }
     }
   )
 );
