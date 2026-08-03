@@ -6,6 +6,8 @@ import { supabase } from './supabaseClient.js';
 const TABLE_NAME = 'solo_leveling_progress';
 const RECORD_ID = 'player_main_progress';
 
+let autoSyncTimer = null;
+
 export async function syncStateToCloud() {
   try {
     const payload = {
@@ -58,4 +60,11 @@ export async function fetchStateFromCloud() {
   } catch (err) {
     return { success: false, error: err.message };
   }
+}
+
+export function triggerDebouncedCloudSync() {
+  if (autoSyncTimer) clearTimeout(autoSyncTimer);
+  autoSyncTimer = setTimeout(() => {
+    syncStateToCloud();
+  }, 1500);
 }

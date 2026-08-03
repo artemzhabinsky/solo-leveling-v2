@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/layout/Header.jsx';
 import { SidebarNav } from './components/layout/SidebarNav.jsx';
 import { BottomTouchbar } from './components/layout/BottomTouchbar.jsx';
@@ -14,6 +14,10 @@ import { RewardShopView } from './components/shop/RewardShopView.jsx';
 import { AnalyticsView } from './components/analytics/AnalyticsView.jsx';
 
 import { usePlayerStore } from './store/usePlayerStore.js';
+import { useTaskStore } from './store/useTaskStore.js';
+import { useShopStore } from './store/useShopStore.js';
+import { useDailyQuestStore } from './store/useDailyQuestStore.js';
+import { triggerDebouncedCloudSync, syncStateToCloud } from './services/supabaseSync.js';
 import { sfx } from './services/audioService.js';
 
 export function App() {
@@ -24,6 +28,24 @@ export function App() {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
 
   const { resetProgress } = usePlayerStore();
+
+  // Automatic Background Supabase Cloud Sync Subscriptions
+  useEffect(() => {
+    const unsubPlayer = usePlayerStore.subscribe(() => triggerDebouncedCloudSync());
+    const unsubTasks = useTaskStore.subscribe(() => triggerDebouncedCloudSync());
+    const unsubShop = useShopStore.subscribe(() => triggerDebouncedCloudSync());
+    const unsubDaily = useDailyQuestStore.subscribe(() => triggerDebouncedCloudSync());
+
+    // Initial background sync push
+    syncStateToCloud();
+
+    return () => {
+      unsubPlayer();
+      unsubTasks();
+      unsubShop();
+      unsubDaily();
+    };
+  }, []);
 
   const handleToggleSound = () => {
     const next = !soundOn;
