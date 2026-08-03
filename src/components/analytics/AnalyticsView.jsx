@@ -44,7 +44,10 @@ export function AnalyticsView() {
   const dailyXpData = last7Days.map(dateStr => {
     const log = analyticsLogs.find(l => l.date === dateStr);
     const dayName = new Date(dateStr).toLocaleDateString('ru-RU', { weekday: 'short' });
-    const hasPenalty = systemEvents.some(ev => ev.eventType === 'penalty_reset' && ev.occurredAt.startsWith(dateStr));
+    const hasPenalty = systemEvents.some(ev => 
+      (ev.eventType === 'penalty_reset' || ev.eventType === 'penalty_hp_loss') && 
+      ev.occurredAt && ev.occurredAt.startsWith(dateStr)
+    );
     return {
       date: dateStr,
       dayName: dayName.toUpperCase(),
@@ -235,7 +238,7 @@ export function AnalyticsView() {
               </span>
             </div>
 
-            {/* Glowing SVG Line Chart (Restored matching Screenshot 1 & 3) */}
+            {/* Glowing SVG Line Chart */}
             <div style={{ position: 'relative', width: '100%', height: '160px', marginTop: '10px' }}>
               <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
                 <defs>

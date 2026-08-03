@@ -171,10 +171,19 @@ export const usePlayerStore = create()(
         const currentHp = state.hp;
         const newHp = Math.max(0, currentHp - amount);
 
+        const penaltyEvent = {
+          id: 'evt-' + Date.now(),
+          eventType: 'penalty_hp_loss',
+          occurredAt: new Date().toISOString()
+        };
+
         if (newHp === 0) {
           get().triggerDeathReset();
         } else {
-          set({ hp: newHp });
+          set({
+            hp: newHp,
+            systemEvents: [...state.systemEvents, penaltyEvent]
+          });
         }
       },
 
