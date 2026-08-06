@@ -1,4 +1,4 @@
--- Supabase SQL Table Setup for Solo Leveling v2 Cloud Sync
+-- Supabase SQL Table Setup & Full Access Permissions for Solo Leveling v2
 
 CREATE TABLE IF NOT EXISTS public.solo_leveling_progress (
   id TEXT PRIMARY KEY,
@@ -9,14 +9,10 @@ CREATE TABLE IF NOT EXISTS public.solo_leveling_progress (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS & Allow Anonymous Read/Write Access
-ALTER TABLE public.solo_leveling_progress ENABLE ROW LEVEL SECURITY;
+-- Grant Table Permissions to Anon & Authenticated Roles
+GRANT ALL ON public.solo_leveling_progress TO anon;
+GRANT ALL ON public.solo_leveling_progress TO authenticated;
+GRANT ALL ON public.solo_leveling_progress TO service_role;
 
-CREATE POLICY "Allow public select" ON public.solo_leveling_progress
-  FOR SELECT USING (true);
-
-CREATE POLICY "Allow public insert" ON public.solo_leveling_progress
-  FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Allow public update" ON public.solo_leveling_progress
-  FOR UPDATE USING (true);
+-- Disable Row Level Security to allow seamless cloud sync
+ALTER TABLE public.solo_leveling_progress DISABLE ROW LEVEL SECURITY;
