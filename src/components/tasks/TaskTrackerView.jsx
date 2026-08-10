@@ -434,9 +434,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
           <button onClick={() => setView('list')} className={`view-btn ${currentView === 'list' ? 'active' : ''}`}>📋 Список</button>
           <button onClick={() => setView('kanban')} className={`view-btn ${currentView === 'kanban' ? 'active' : ''}`}>📌 Канбан</button>
           <button onClick={() => setView('calendar')} className={`view-btn ${currentView === 'calendar' ? 'active' : ''}`}>📅 Календарь</button>
-          <button onClick={() => setView('completed')} className={`view-btn ${currentView === 'completed' ? 'active' : ''}`}>
-            ✅ Выполненные ({archiveCompletedTasks.length})
-          </button>
+          <button onClick={() => setView('completed')} className={`view-btn ${currentView === 'completed' ? 'active' : ''}`}>✅ Done</button>
         </div>
 
         <div className="filter-group" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
