@@ -75,6 +75,21 @@ export function TaskTrackerView({ onShowLevelUp }) {
     return matchCat && matchRank;
   });
 
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  // Helper predicate: A task is completed on a past day if it is done and completedAt/dueDate < todayStr
+  const isCompletedOnPastDay = (t) => {
+    if (t.status !== 'done') return false;
+    const compDate = t.completedAt ? t.completedAt.split('T')[0] : t.dueDate;
+    return compDate && compDate < todayStr;
+  };
+
+  // Active tasks for List, Kanban, and Calendar views (Excludes past completed tasks)
+  const activeFilteredTasks = filteredTasks.filter(t => !isCompletedOnPastDay(t));
+
+  // All completed tasks for the dedicated 'completed' tab archive
+  const archiveCompletedTasks = filteredTasks.filter(t => t.status === 'done');
+
   const handleToggleTask = (taskId) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
@@ -170,7 +185,6 @@ export function TaskTrackerView({ onShowLevelUp }) {
   };
 
   // Chronological Grouping Logic for List View (Сегодня, Завтра, На неделе, Потом)
-  const todayStr = new Date().toISOString().split('T')[0];
   const tomorrowObj = new Date();
   tomorrowObj.setDate(tomorrowObj.getDate() + 1);
   const tomorrowStr = tomorrowObj.toISOString().split('T')[0];
@@ -179,13 +193,12 @@ export function TaskTrackerView({ onShowLevelUp }) {
   weekEndObj.setDate(weekEndObj.getDate() + 7);
   const weekEndStr = weekEndObj.toISOString().split('T')[0];
 
-  // Any task with dueDate <= todayStr automatically belongs to TODAY section
-  const todayTasks = filteredTasks.filter(t => !t.dueDate || t.dueDate <= todayStr);
-  const tomorrowTasks = filteredTasks.filter(t => t.dueDate === tomorrowStr);
-  const weekTasks = filteredTasks.filter(t => t.dueDate > tomorrowStr && t.dueDate <= weekEndStr);
-  const laterTasks = filteredTasks.filter(t => t.dueDate > weekEndStr);
+  const todayTasks = activeFilteredTasks.filter(t => !t.dueDate || t.dueDate <= todayStr);
+  const tomorrowTasks = activeFilteredTasks.filter(t => t.dueDate === tomorrowStr);
+  const weekTasks = activeFilteredTasks.filter(t => t.dueDate > tomorrowStr && t.dueDate <= weekEndStr);
+  const laterTasks = activeFilteredTasks.filter(t => t.dueDate > weekEndStr);
 
-  const todayPlannedCount = filteredTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr).length;
+  const todayPlannedCount = activeFilteredTasks.filter(t => (t.originalDueDate || t.dueDate) === todayStr).length;
   const todayActualDoneCount = todayTasks.filter(t => t.status === 'done').length;
 
   const renderYouGileSubtaskTree = (t) => {
@@ -293,6 +306,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
           <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
             {cat && <span style={{ color: cat.color, fontWeight: 600 }}>{cat.label}</span>}
             <span>📅 {t.dueDate || 'Без даты'}</span>
+            {t.completedAt && <span style={{ color: '#00ff88' }}>✓ Выполнено: {new Date(t.completedAt).toLocaleDateString('ru-RU')}</span>}
           </div>
           
           {renderYouGileSubtaskTree(t)}
@@ -406,6 +420,9 @@ export function TaskTrackerView({ onShowLevelUp }) {
     }
   };
 
+  const totalArchivedXp = archiveCompletedTasks.reduce((acc, t) => acc + (t.xpReward || 0), 0);
+  const totalArchivedGold = archiveCompletedTasks.reduce((acc, t) => acc + (t.coinReward || 0), 0);
+
   return (
     <div>
       <div className="task-controls-bar">
@@ -417,6 +434,9 @@ export function TaskTrackerView({ onShowLevelUp }) {
           <button onClick={() => setView('list')} className={`view-btn ${currentView === 'list' ? 'active' : ''}`}>📋 Список</button>
           <button onClick={() => setView('kanban')} className={`view-btn ${currentView === 'kanban' ? 'active' : ''}`}>📌 Канбан</button>
           <button onClick={() => setView('calendar')} className={`view-btn ${currentView === 'calendar' ? 'active' : ''}`}>📅 Календарь</button>
+          <button onClick={() => setView('completed')} className={`view-btn ${currentView === 'completed' ? 'active' : ''}`}>
+            ✅ Выполненные ({archiveCompletedTasks.length})
+          </button>
         </div>
 
         <div className="filter-group" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -440,8 +460,8 @@ export function TaskTrackerView({ onShowLevelUp }) {
       {/* CHRONOLOGICAL GROUPED LIST VIEW */}
       {currentView === 'list' && (
         <div className="tasks-list-container" style={{ marginTop: '20px' }}>
-          {filteredTasks.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px' }}>Задач не найдено. Нажмите "+ Новая Задача"!</div>
+          {activeFilteredTasks.length === 0 ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '40px' }}>Активных задач не найдено. Нажмите "+ Новая Задача"!</div>
           ) : (
             <>
               {renderTaskSection('СЕГОДНЯ', todayTasks, sectionStyles.today, `${todayActualDoneCount}/${todayPlannedCount}`)}
@@ -459,7 +479,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
           {[
             { key: 'urgent', title: '🔥 СРОЧНЫЕ' },
             { key: 'non_urgent', title: '⏳ НЕ СРОЧНЫЕ' },
-            { key: 'done', title: '✅ ВЫПОЛНЕНО' }
+            { key: 'done', title: '✅ ВЫПОЛНЕНО СЕГОДНЯ' }
           ].map((col) => (
             <div
               key={col.key}
@@ -468,10 +488,10 @@ export function TaskTrackerView({ onShowLevelUp }) {
               onDrop={(e) => handleDrop(e, col.key)}
             >
               <div className="kanban-column-header">
-                <span>{col.title} ({filteredTasks.filter(t => (t.status || 'urgent') === col.key).length})</span>
+                <span>{col.title} ({activeFilteredTasks.filter(t => (t.status || 'urgent') === col.key).length})</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {filteredTasks.filter(t => (t.status || 'urgent') === col.key).map(t => {
+                {activeFilteredTasks.filter(t => (t.status || 'urgent') === col.key).map(t => {
                   const cat = CATEGORIES.find(c => c.key === t.category);
                   return (
                     <div
@@ -522,8 +542,8 @@ export function TaskTrackerView({ onShowLevelUp }) {
               <div key={d} style={{ textAlign: 'center', fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--system-blue)', padding: '6px', fontWeight: 700 }}>{d}</div>
             ))}
             {Array.from({ length: 30 }, (_, i) => i + 1).map(day => {
-              const dateStr = `2026-07-${String(day).padStart(2, '0')}`;
-              const dayTasks = tasks.filter(t => t.dueDate === dateStr);
+              const dateStr = `2026-08-${String(day).padStart(2, '0')}`;
+              const dayTasks = activeFilteredTasks.filter(t => t.dueDate === dateStr);
               return (
                 <div key={day} style={{ background: 'rgba(5,12,28,0.7)', border: '1px solid rgba(0,240,255,0.1)', minHeight: '70px', borderRadius: '6px', padding: '6px' }}>
                   <div style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>{day}</div>
@@ -536,6 +556,42 @@ export function TaskTrackerView({ onShowLevelUp }) {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* DEDICATED COMPLETED ARCHIVE VIEW */}
+      {currentView === 'completed' && (
+        <div style={{ marginTop: '20px' }}>
+          <div className="task-section-card-container" style={{ borderColor: 'rgba(0, 255, 136, 0.4)', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: '#00ff88', fontWeight: 700, letterSpacing: '1px' }}>🏆 АРХИВ ВЫПОЛНЕННЫХ КВЕСТОВ</div>
+                <h2 className="font-orbitron" style={{ color: '#ffffff', fontSize: '20px', marginTop: '2px' }}>
+                  ЗАВЕРШЁННЫЕ ЗАДАЧИ ({archiveCompletedTasks.length})
+                </h2>
+              </div>
+              <div style={{ display: 'flex', gap: '14px', fontSize: '13px' }}>
+                <span className="xp-gain" style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(0, 240, 255, 0.1)', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
+                  Всего получено: <strong>+{totalArchivedXp} XP</strong>
+                </span>
+                <span className="gold-gain" style={{ padding: '4px 10px', borderRadius: '8px', background: 'rgba(255, 215, 0, 0.1)', border: '1px solid rgba(255, 215, 0, 0.3)' }}>
+                  Заработано: <strong>+{totalArchivedGold} 🪙</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {archiveCompletedTasks.length === 0 ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '50px', background: 'var(--bg-card)', border: 'var(--border-system)', borderRadius: '12px' }}>
+              Выполненных задач пока нет. Выполните квест в списке или Канбане!
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[...archiveCompletedTasks]
+                .sort((a, b) => new Date(b.completedAt || b.dueDate).getTime() - new Date(a.completedAt || a.dueDate).getTime())
+                .map(t => renderTaskCard(t))}
+            </div>
+          )}
         </div>
       )}
 
