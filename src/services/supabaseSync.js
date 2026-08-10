@@ -7,9 +7,22 @@ const TABLE_NAME = 'solo_leveling_progress';
 const RECORD_ID = 'player_main_progress';
 
 let autoSyncTimer = null;
+let syncStatusListeners = [];
+
+export function subscribeSyncStatus(listener) {
+  syncStatusListeners.push(listener);
+  return () => {
+    syncStatusListeners = syncStatusListeners.filter(l => l !== listener);
+  };
+}
+
+function notifySyncStatus(status) {
+  syncStatusListeners.forEach(l => l(status));
+}
 
 export async function syncStateToCloud() {
   try {
+    notifySyncStatus('saving');
     const payload = {
       id: RECORD_ID,
       player_store: localStorage.getItem('SOLO_LEVELING_PLAYER_STORE_V2') || '{}',
@@ -25,18 +38,22 @@ export async function syncStateToCloud() {
 
     if (error) {
       console.warn('Supabase Sync Warning:', error.message);
+      notifySyncStatus('error');
       return { success: false, error: error.message };
     }
 
+    notifySyncStatus('synced');
     return { success: true };
   } catch (err) {
     console.error('Supabase Sync Error:', err);
+    notifySyncStatus('error');
     return { success: false, error: err.message };
   }
 }
 
 export async function fetchStateFromCloud() {
   try {
+    notifySyncStatus('loading');
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .select('*')
@@ -44,6 +61,7 @@ export async function fetchStateFromCloud() {
       .single();
 
     if (error) {
+      notifySyncStatus('error');
       return { success: false, error: error.message };
     }
 
@@ -53,18 +71,22 @@ export async function fetchStateFromCloud() {
       if (data.shop_store) localStorage.setItem('SOLO_LEVELING_SHOP_STORE_V2', data.shop_store);
       if (data.daily_quests_store) localStorage.setItem('SOLO_LEVELING_DAILY_QUESTS_STORE', data.daily_quests_store);
 
+      notifySyncStatus('synced');
       return { success: true, updated_at: data.updated_at };
     }
 
+    notifySyncStatus('error');
     return { success: false, error: 'Запись не найдена' };
   } catch (err) {
+    notifySyncStatus('error');
     return { success: false, error: err.message };
   }
 }
 
 export function triggerDebouncedCloudSync() {
+  notifySyncStatus('pending');
   if (autoSyncTimer) clearTimeout(autoSyncTimer);
   autoSyncTimer = setTimeout(() => {
     syncStateToCloud();
-  }, 1500);
+  }, 1000);
 }

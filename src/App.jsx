@@ -17,7 +17,7 @@ import { usePlayerStore } from './store/usePlayerStore.js';
 import { useTaskStore } from './store/useTaskStore.js';
 import { useShopStore } from './store/useShopStore.js';
 import { useDailyQuestStore } from './store/useDailyQuestStore.js';
-import { triggerDebouncedCloudSync, syncStateToCloud } from './services/supabaseSync.js';
+import { triggerDebouncedCloudSync, syncStateToCloud, subscribeSyncStatus } from './services/supabaseSync.js';
 import { sfx } from './services/audioService.js';
 
 export function App() {
@@ -26,11 +26,16 @@ export function App() {
   const [levelUpData, setLevelUpData] = useState(null);
   const [soundOn, setSoundOn] = useState(true);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [cloudSyncState, setCloudSyncState] = useState('synced');
 
   const { resetProgress } = usePlayerStore();
 
-  // Automatic Background Supabase Cloud Sync Subscriptions
+  // Automatic Background Supabase Cloud Sync Subscriptions & Status Listener
   useEffect(() => {
+    const unsubStatus = subscribeSyncStatus((status) => {
+      setCloudSyncState(status);
+    });
+
     const unsubPlayer = usePlayerStore.subscribe(() => triggerDebouncedCloudSync());
     const unsubTasks = useTaskStore.subscribe(() => triggerDebouncedCloudSync());
     const unsubShop = useShopStore.subscribe(() => triggerDebouncedCloudSync());
@@ -40,6 +45,7 @@ export function App() {
     syncStateToCloud();
 
     return () => {
+      unsubStatus();
       unsubPlayer();
       unsubTasks();
       unsubShop();
@@ -57,6 +63,16 @@ export function App() {
     if (window.confirm('Сбросить весь прогресс и вернуть начальные данные?')) {
       resetProgress();
     }
+  };
+
+  const renderCloudBadge = () => {
+    if (cloudSyncState === 'saving' || cloudSyncState === 'pending') {
+      return <span style={{ fontSize: '11px', color: 'var(--system-gold)', fontWeight: 600 }}>☁️ Облако: Сохранение...</span>;
+    }
+    if (cloudSyncState === 'error') {
+      return <span style={{ fontSize: '11px', color: 'var(--system-crimson)', fontWeight: 600 }}>☁️ Облако: Ошибка</span>;
+    }
+    return <span style={{ fontSize: '11px', color: '#00ff88', fontWeight: 600 }}>☁️ Облако: Авто-синхронизировано ✓</span>;
   };
 
   return (
@@ -84,13 +100,16 @@ export function App() {
 
         {/* Footer Toolbar */}
         <footer className="system-footer-toolbar" style={{ marginTop: '30px', paddingTop: '16px', borderTop: '1px solid rgba(0, 240, 255, 0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <button onClick={handleResetData} className="btn-system btn-danger" style={{ padding: '6px 12px', fontSize: '11px' }}>
               🔄 СБРОСИТЬ ПРОГРЕСС
             </button>
             <button onClick={() => setIsBackupModalOpen(true)} className="btn-system btn-gold" style={{ padding: '6px 12px', fontSize: '11px' }}>
               💾 БЭКАП И СОХРАНЕНИЕ
             </button>
+            <div style={{ background: 'rgba(5, 12, 30, 0.8)', border: '1px solid rgba(0, 240, 255, 0.2)', padding: '6px 12px', borderRadius: '8px' }}>
+              {renderCloudBadge()}
+            </div>
           </div>
 
           <div>
