@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDailyQuestStore } from '../../store/useDailyQuestStore.js';
 import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { sfx } from '../../services/audioService.js';
+import { getLocalDateStr } from '../../utils/dateUtils.js';
 
 export function DailyQuestsPanel({ onShowLevelUp }) {
   const { quests, toggleQuestCompleted, addQuest, deleteQuest } = useDailyQuestStore();
@@ -12,7 +13,7 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
   const [newCoins, setNewCoins] = useState(20);
   const [, setTick] = useState(0);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateStr();
 
   // Auto-check for missed daily quests & 1-second interval for countdown timer
   useEffect(() => {

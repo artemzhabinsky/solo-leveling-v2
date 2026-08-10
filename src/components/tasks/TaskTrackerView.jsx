@@ -4,6 +4,7 @@ import { usePlayerStore } from '../../store/usePlayerStore.js';
 import { CATEGORIES } from '../../domain/categories.js';
 import { sfx } from '../../services/audioService.js';
 import { TodayCompletedModal } from '../modals/TodayCompletedModal.jsx';
+import { getLocalDateStr } from '../../utils/dateUtils.js';
 
 export function TaskTrackerView({ onShowLevelUp }) {
   const {
@@ -39,7 +40,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
     category: 'mental',
     rank: 'C',
     status: 'urgent',
-    dueDate: new Date().toISOString().split('T')[0],
+    dueDate: getLocalDateStr(),
     subtasks: []
   });
 
@@ -75,7 +76,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
     return matchCat && matchRank;
   });
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateStr();
 
   // Helper predicate: A task is completed on a past day if it is done and completedAt/dueDate < todayStr
   const isCompletedOnPastDay = (t) => {
@@ -120,7 +121,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
       category: 'mental',
       rank: 'C',
       status: 'urgent',
-      dueDate: new Date().toISOString().split('T')[0],
+      dueDate: getLocalDateStr(),
       subtasks: []
     });
     setIsAddModalOpen(false);
@@ -187,11 +188,11 @@ export function TaskTrackerView({ onShowLevelUp }) {
   // Chronological Grouping Logic for List View (Сегодня, Завтра, На неделе, Потом)
   const tomorrowObj = new Date();
   tomorrowObj.setDate(tomorrowObj.getDate() + 1);
-  const tomorrowStr = tomorrowObj.toISOString().split('T')[0];
+  const tomorrowStr = getLocalDateStr(tomorrowObj);
 
   const weekEndObj = new Date();
   weekEndObj.setDate(weekEndObj.getDate() + 7);
-  const weekEndStr = weekEndObj.toISOString().split('T')[0];
+  const weekEndStr = getLocalDateStr(weekEndObj);
 
   const todayTasks = activeFilteredTasks.filter(t => !t.dueDate || t.dueDate <= todayStr);
   const tomorrowTasks = activeFilteredTasks.filter(t => t.dueDate === tomorrowStr);

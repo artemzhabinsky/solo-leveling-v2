@@ -3,6 +3,7 @@
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { getLocalDateStr } from '../utils/dateUtils.js';
 
 export const useDailyQuestStore = create()(
   persist(
@@ -27,11 +28,11 @@ export const useDailyQuestStore = create()(
 
       toggleQuestCompleted: (questId) => {
         const { quests } = get();
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateStr();
         const quest = quests.find(q => q.id === questId);
         if (!quest) return null;
 
-        const isDoneToday = quest.lastCompletedDate === todayStr;
+        const isDoneToday = q.lastCompletedDate === todayStr;
         const nextDate = isDoneToday ? null : todayStr;
 
         set({

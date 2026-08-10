@@ -4,6 +4,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { applyXp } from '../domain/xp.js';
+import { getLocalDateStr } from '../utils/dateUtils.js';
 
 export const DEFAULT_STATS = {
   strength: 0,     // STR (Physical)
@@ -27,7 +28,7 @@ export const usePlayerStore = create()(
       unlockedTitles: ['Пробуждённый'],
       stats: { ...DEFAULT_STATS },
       dailyStreak: 3,
-      lastHpCheckDate: new Date().toISOString().split('T')[0],
+      lastHpCheckDate: getLocalDateStr(),
       analyticsLogs: [],
       systemEvents: [],
       showDeathModal: false,
@@ -69,7 +70,7 @@ export const usePlayerStore = create()(
       // Automatic Daily HP Loss Penalty Check for Missed Days
       checkMissedDailyQuests: (quests = []) => {
         const state = get();
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateStr();
         const lastCheck = state.lastHpCheckDate || todayStr;
 
         if (lastCheck === todayStr) return;
@@ -82,7 +83,7 @@ export const usePlayerStore = create()(
           // Check if daily quests were completed yesterday
           const yesterdayObj = new Date();
           yesterdayObj.setDate(yesterdayObj.getDate() - 1);
-          const yesterdayStr = yesterdayObj.toISOString().split('T')[0];
+          const yesterdayStr = getLocalDateStr(yesterdayObj);
 
           const completedYesterday = quests.some(q => q.lastCompletedDate === yesterdayStr);
 
@@ -130,7 +131,7 @@ export const usePlayerStore = create()(
         }
         updatedStats[targetAttr] = (updatedStats[targetAttr] || 0) + 1;
 
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateStr();
         const existingLogs = [...state.analyticsLogs];
         let todayLog = existingLogs.find(l => l.date === todayStr);
 

@@ -4,6 +4,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getRewardForRank } from '../domain/rewards.js';
+import { getLocalDateStr } from '../utils/dateUtils.js';
 
 export const useTaskStore = create()(
   persist(
@@ -72,7 +73,7 @@ export const useTaskStore = create()(
       // Automatic Rollover for Overdue Unfinished Tasks to Today's Date
       rolloverOverdueTasks: () => {
         const { tasks } = get();
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateStr();
         let changed = false;
 
         const nextTasks = tasks.map(t => {
@@ -94,7 +95,7 @@ export const useTaskStore = create()(
 
       addTask: (taskData) => {
         const reward = getRewardForRank(taskData.rank || 'C');
-        const dueDate = taskData.dueDate || new Date().toISOString().split('T')[0];
+        const dueDate = taskData.dueDate || getLocalDateStr();
         const newTask = {
           id: 'task-' + Date.now(),
           title: taskData.title,
@@ -153,7 +154,7 @@ export const useTaskStore = create()(
         const task = tasks.find(t => t.id === taskId);
         if (!task) return null;
 
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateStr();
         const wasDone = task.status === 'done';
         const isNowDone = newStatus === 'done';
 
