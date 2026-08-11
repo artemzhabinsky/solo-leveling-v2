@@ -69,7 +69,31 @@ export const usePlayerStore = create()(
       },
 
       fixBalanceTo665: () => {
-        set({ gold: 665, totalGoldEarned: 665, hasFixedTotalGold665: true });
+        const state = get();
+        const yesterdayObj = new Date();
+        yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+        const yesterdayStr = getLocalDateStr(yesterdayObj);
+        const todayStr = getLocalDateStr();
+
+        const logs = [...state.analyticsLogs];
+        
+        let yLog = logs.find(l => l.date === yesterdayStr);
+        if (!yLog) {
+          yLog = { date: yesterdayStr, xpGained: 656, goldGained: 130, tasksCompleted: 3, categoryBreakdown: { mental: 2, physical: 1 } };
+          logs.push(yLog);
+        } else {
+          yLog.goldGained = 130;
+        }
+
+        let tLog = logs.find(l => l.date === todayStr);
+        if (!tLog) {
+          tLog = { date: todayStr, xpGained: 2152, goldGained: 535, tasksCompleted: 9, categoryBreakdown: { mental: 5, physical: 2, spirit: 2 } };
+          logs.push(tLog);
+        } else {
+          tLog.goldGained = 535;
+        }
+
+        set({ gold: 665, totalGoldEarned: 665, analyticsLogs: logs, hasFixedGoldHistory: true });
       },
 
       // Automatic Daily HP Loss Penalty Check for Missed Days
