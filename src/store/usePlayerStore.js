@@ -87,13 +87,13 @@ export const usePlayerStore = create()(
 
         let tLog = logs.find(l => l.date === todayStr);
         if (!tLog) {
-          tLog = { date: todayStr, xpGained: 2152, goldGained: 535, tasksCompleted: 9, categoryBreakdown: { mental: 5, physical: 2, spirit: 2 } };
+          tLog = { date: todayStr, xpGained: 2152, goldGained: 250, tasksCompleted: 9, categoryBreakdown: { mental: 5, physical: 2, spirit: 2 } };
           logs.push(tLog);
         } else {
-          tLog.goldGained = 535;
+          tLog.goldGained = 250;
         }
 
-        set({ gold: 665, totalGoldEarned: 665, analyticsLogs: logs, hasFixedGoldHistory: true });
+        set({ gold: 665, totalGoldEarned: 665, analyticsLogs: logs, hasFixedGoldToday250: true });
       },
 
       // Automatic Daily HP Loss Penalty Check for Missed Days

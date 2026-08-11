@@ -28,10 +28,10 @@ export function App() {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [cloudSyncState, setCloudSyncState] = useState('synced');
 
-  const { resetProgress, fixBalanceTo665, hasFixedGoldHistory } = usePlayerStore();
+  const { resetProgress, fixBalanceTo665, hasFixedGoldToday250 } = usePlayerStore();
 
   useEffect(() => {
-    if (fixBalanceTo665 && !hasFixedGoldHistory) {
+    if (fixBalanceTo665 && !hasFixedGoldToday250) {
       fixBalanceTo665();
     }
   }, []);
