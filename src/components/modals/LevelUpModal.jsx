@@ -27,11 +27,11 @@ export function LevelUpModal({ data, onClose }) {
         <div className="font-system" style={{ fontSize: '22px', color: '#ffffff', marginTop: '10px', fontWeight: '900' }}>
           УРОВЕНЬ {data.newLevel} — {rankInfo.title}
         </div>
-        <div style={{ color: 'var(--system-gold)', fontFamily: 'var(--font-system)', marginTop: '8px', fontSize: '16px' }}>
-          +{data.statPointsGained} Очков Характеристик
+        <div style={{ color: 'var(--system-gold)', fontFamily: 'var(--font-system)', marginTop: '8px', fontSize: '16px', fontWeight: '700' }}>
+          ✨ Добавлено по 1 очку характеристик
         </div>
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '14px', lineHeight: '1.5' }}>
-          Вы стали сильнее! Откройте Окно Статуса, чтобы распределить очки характеристик.
+          Вы стали сильнее! Каждая характеристика (STR, INT, VIT, GOLD, DISC) автоматически выросла.
         </p>
         <button onClick={onClose} className="btn-system" style={{ marginTop: '20px', width: '100%', justifyContent: 'center' }}>
           ПРИНЯТЬ
