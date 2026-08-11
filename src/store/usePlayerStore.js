@@ -69,7 +69,7 @@ export const usePlayerStore = create()(
       },
 
       fixBalanceTo665: () => {
-        set({ gold: 665, hasFixedBalance665: true });
+        set({ gold: 665, totalGoldEarned: 665, hasFixedTotalGold665: true });
       },
 
       // Automatic Daily HP Loss Penalty Check for Missed Days
