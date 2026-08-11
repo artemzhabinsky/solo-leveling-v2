@@ -102,6 +102,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
       if (result.justCompleted) {
         sfx.playQuestComplete();
         const rewardResult = awardXpAndGold(task.xpReward, task.coinReward, task.category);
+        editTask(taskId, { lastEarnedXp: rewardResult.finalXp, lastEarnedGold: rewardResult.finalGold });
         if (rewardResult.leveledUp) {
           onShowLevelUp(rewardResult);
         }
@@ -109,7 +110,9 @@ export function TaskTrackerView({ onShowLevelUp }) {
           setIsTodayCompletedModalOpen(true);
         }
       } else {
-        revertXpAndGold(task.xpReward, task.coinReward, task.category);
+        const earnedXp = task.lastEarnedXp || task.xpReward;
+        const earnedGold = task.lastEarnedGold || task.coinReward;
+        revertXpAndGold(earnedXp, earnedGold, task.category);
       }
     }
   };

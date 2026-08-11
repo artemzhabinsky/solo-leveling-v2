@@ -292,7 +292,13 @@ export const usePlayerStore = create()(
       }
     }),
     {
-      name: 'SOLO_LEVELING_PLAYER_STORE_V2'
+      name: 'SOLO_LEVELING_PLAYER_STORE_V2',
+      onRehydrateStorage: () => (state) => {
+        if (state && !state.hasDeductedSquatTestCoins) {
+          state.spendGold(60);
+          state.hasDeductedSquatTestCoins = true;
+        }
+      }
     }
   )
 );

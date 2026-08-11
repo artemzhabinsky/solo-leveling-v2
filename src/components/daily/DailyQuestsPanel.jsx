@@ -5,8 +5,8 @@ import { sfx } from '../../services/audioService.js';
 import { getLocalDateStr } from '../../utils/dateUtils.js';
 
 export function DailyQuestsPanel({ onShowLevelUp }) {
-  const { quests, toggleQuestCompleted, addQuest, deleteQuest } = useDailyQuestStore();
-  const { dailyStreak, awardXpAndGold, checkMissedDailyQuests } = usePlayerStore();
+  const { quests, toggleQuestCompleted, setQuestLastEarned, addQuest, deleteQuest } = useDailyQuestStore();
+  const { dailyStreak, awardXpAndGold, revertXpAndGold, checkMissedDailyQuests } = usePlayerStore();
   
   const [newTitle, setNewTitle] = useState('');
   const [newXp, setNewXp] = useState(100);
@@ -48,11 +48,14 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
       if (result.justCompleted) {
         sfx.playQuestComplete();
         const rewardResult = awardXpAndGold(result.quest.xp, result.quest.coins, 'physical');
+        setQuestLastEarned(questId, rewardResult.finalXp, rewardResult.finalGold);
         if (rewardResult.leveledUp) {
           onShowLevelUp(rewardResult);
         }
       } else {
-        revertXpAndGold(result.quest.xp, result.quest.coins, 'physical');
+        const earnedXp = result.quest.lastEarnedXp || result.quest.xp;
+        const earnedGold = result.quest.lastEarnedGold || result.quest.coins;
+        revertXpAndGold(earnedXp, earnedGold, 'physical');
       }
     }
   };
