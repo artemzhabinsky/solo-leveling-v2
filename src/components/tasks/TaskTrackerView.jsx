@@ -22,7 +22,7 @@ export function TaskTrackerView({ onShowLevelUp }) {
     deleteTask,
     rolloverOverdueTasks
   } = useTaskStore();
-  const { awardXpAndGold } = usePlayerStore();
+  const { awardXpAndGold, revertXpAndGold } = usePlayerStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -98,14 +98,18 @@ export function TaskTrackerView({ onShowLevelUp }) {
     const newStatus = task.status === 'done' ? 'urgent' : 'done';
     const result = updateTaskStatus(taskId, newStatus);
 
-    if (result && result.justCompleted) {
-      sfx.playQuestComplete();
-      const rewardResult = awardXpAndGold(task.xpReward, task.coinReward, task.category);
-      if (rewardResult.leveledUp) {
-        onShowLevelUp(rewardResult);
-      }
-      if (result.allTodayCompleted) {
-        setIsTodayCompletedModalOpen(true);
+    if (result) {
+      if (result.justCompleted) {
+        sfx.playQuestComplete();
+        const rewardResult = awardXpAndGold(task.xpReward, task.coinReward, task.category);
+        if (rewardResult.leveledUp) {
+          onShowLevelUp(rewardResult);
+        }
+        if (result.allTodayCompleted) {
+          setIsTodayCompletedModalOpen(true);
+        }
+      } else {
+        revertXpAndGold(task.xpReward, task.coinReward, task.category);
       }
     }
   };
@@ -169,18 +173,22 @@ export function TaskTrackerView({ onShowLevelUp }) {
     const taskId = e.dataTransfer.getData('text/plain');
     if (!taskId) return;
 
+    const task = tasks.find(t => t.id === taskId);
+    const wasDone = task && task.status === 'done';
+
     const result = updateTaskStatus(taskId, targetStatus);
-    if (result && result.justCompleted) {
-      sfx.playQuestComplete();
-      const task = tasks.find(t => t.id === taskId);
-      if (task) {
+    if (result) {
+      if (result.justCompleted && task) {
+        sfx.playQuestComplete();
         const rewardResult = awardXpAndGold(task.xpReward, task.coinReward, task.category);
         if (rewardResult.leveledUp) {
           onShowLevelUp(rewardResult);
         }
-      }
-      if (result.allTodayCompleted) {
-        setIsTodayCompletedModalOpen(true);
+        if (result.allTodayCompleted) {
+          setIsTodayCompletedModalOpen(true);
+        }
+      } else if (wasDone && targetStatus !== 'done' && task) {
+        revertXpAndGold(task.xpReward, task.coinReward, task.category);
       }
     }
   };

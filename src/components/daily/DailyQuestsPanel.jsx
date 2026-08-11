@@ -44,11 +44,15 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
 
   const handleToggle = (questId) => {
     const result = toggleQuestCompleted(questId);
-    if (result && result.justCompleted) {
-      sfx.playQuestComplete();
-      const rewardResult = awardXpAndGold(result.quest.xp, result.quest.coins, 'spirit');
-      if (rewardResult.leveledUp) {
-        onShowLevelUp(rewardResult);
+    if (result) {
+      if (result.justCompleted) {
+        sfx.playQuestComplete();
+        const rewardResult = awardXpAndGold(result.quest.xp, result.quest.coins, 'spirit');
+        if (rewardResult.leveledUp) {
+          onShowLevelUp(rewardResult);
+        }
+      } else {
+        revertXpAndGold(result.quest.xp, result.quest.coins, 'spirit');
       }
     }
   };

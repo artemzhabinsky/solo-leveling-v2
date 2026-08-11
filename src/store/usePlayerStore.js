@@ -3,7 +3,7 @@
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { applyXp } from '../domain/xp.js';
+import { applyXp, xpRequiredForLevel } from '../domain/xp.js';
 import { getLocalDateStr } from '../utils/dateUtils.js';
 
 export const DEFAULT_STATS = {
@@ -159,6 +159,61 @@ export const usePlayerStore = create()(
           leveledUp: xpResult.leveledUp,
           newLevel: xpResult.level
         };
+      },
+
+      // Revert awarded XP, Gold, Stats, and Analytics when unmarking a task!
+      revertXpAndGold: (baseXp, baseGold, categoryKey = 'mental') => {
+        const state = get();
+        let newXp = state.xp - baseXp;
+        let newLevel = state.level;
+
+        while (newXp < 0 && newLevel > 1) {
+          newLevel -= 1;
+          newXp += xpRequiredForLevel(newLevel);
+        }
+        if (newLevel === 1 && newXp < 0) {
+          newXp = 0;
+        }
+
+        const newGold = Math.max(0, state.gold - baseGold);
+        const newTotalGold = Math.max(0, state.totalGoldEarned - baseGold);
+
+        const attrMap = {
+          physical: 'strength',
+          mental: 'intelligence',
+          spirit: 'vitality',
+          finance: 'goldBonus',
+          discipline: 'sense'
+        };
+        const targetAttr = attrMap[categoryKey] || 'intelligence';
+        const updatedStats = { ...state.stats };
+        updatedStats[targetAttr] = Math.max(0, (updatedStats[targetAttr] || 0) - 1);
+
+        const todayStr = getLocalDateStr();
+        const existingLogs = state.analyticsLogs.map(l => {
+          if (l.date === todayStr) {
+            const updatedBreakdown = { ...(l.categoryBreakdown || {}) };
+            if (updatedBreakdown[categoryKey]) {
+              updatedBreakdown[categoryKey] = Math.max(0, updatedBreakdown[categoryKey] - 1);
+            }
+            return {
+              ...l,
+              xpGained: Math.max(0, l.xpGained - baseXp),
+              tasksCompleted: Math.max(0, l.tasksCompleted - 1),
+              categoryBreakdown: updatedBreakdown
+            };
+          }
+          return l;
+        });
+
+        set({
+          level: newLevel,
+          xp: newXp,
+          gold: newGold,
+          totalGoldEarned: newTotalGold,
+          stats: updatedStats,
+          analyticsLogs: existingLogs
+        });
       },
 
       deductHp: (amount = 1) => {
