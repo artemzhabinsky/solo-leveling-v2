@@ -47,12 +47,12 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
     if (result) {
       if (result.justCompleted) {
         sfx.playQuestComplete();
-        const rewardResult = awardXpAndGold(result.quest.xp, result.quest.coins, 'spirit');
+        const rewardResult = awardXpAndGold(result.quest.xp, result.quest.coins, 'physical');
         if (rewardResult.leveledUp) {
           onShowLevelUp(rewardResult);
         }
       } else {
-        revertXpAndGold(result.quest.xp, result.quest.coins, 'spirit');
+        revertXpAndGold(result.quest.xp, result.quest.coins, 'physical');
       }
     }
   };
