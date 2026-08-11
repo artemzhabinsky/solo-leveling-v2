@@ -8,7 +8,7 @@ export const POTION_ITEMS = [
   {
     id: 'potion-hp',
     title: 'Зелье Восстановления HP',
-    cost: 1000,
+    cost: 350,
     emoji: '🧪',
     description: 'Восстанавливает 1 сгоревшую жизнь HP (максимум 3/3 HP).',
     isPotion: true,
@@ -17,7 +17,7 @@ export const POTION_ITEMS = [
   {
     id: 'potion-shield',
     title: 'Щит от Прокрастинации',
-    cost: 1000,
+    cost: 350,
     emoji: '🛡️',
     description: 'Заслоняет от потери HP, если вы случайно пропустите ежедневный квест.',
     isPotion: true,
@@ -44,12 +44,21 @@ export const useShopStore = create()(
 
       ensurePotionsInCatalog: () => {
         const { catalog } = get();
-        const hasHp = catalog.some(i => i.id === 'potion-hp');
-        const hasShield = catalog.some(i => i.id === 'potion-shield');
+        const updatedCatalog = catalog.map(item => {
+          if (item.id === 'potion-hp' || item.id === 'potion-shield') {
+            return { ...item, cost: 350 };
+          }
+          return item;
+        });
+
+        const hasHp = updatedCatalog.some(i => i.id === 'potion-hp');
+        const hasShield = updatedCatalog.some(i => i.id === 'potion-shield');
 
         if (!hasHp || !hasShield) {
-          const missingPotions = POTION_ITEMS.filter(p => !catalog.some(i => i.id === p.id));
-          set({ catalog: [...missingPotions, ...catalog] });
+          const missingPotions = POTION_ITEMS.filter(p => !updatedCatalog.some(i => i.id === p.id));
+          set({ catalog: [...missingPotions, ...updatedCatalog] });
+        } else {
+          set({ catalog: updatedCatalog });
         }
       },
 
@@ -126,7 +135,7 @@ export const useShopStore = create()(
       }
     }),
     {
-      name: 'SOLO_LEVELING_SHOP_STORE_V2', // Bump key to SOLO_LEVELING_SHOP_STORE_V2 so fresh defaults load immediately for all users!
+      name: 'SOLO_LEVELING_SHOP_STORE_V2',
       onRehydrateStorage: () => (state) => {
         if (state) state.ensurePotionsInCatalog();
       }
