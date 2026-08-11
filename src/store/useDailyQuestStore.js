@@ -32,7 +32,7 @@ export const useDailyQuestStore = create()(
         const quest = quests.find(q => q.id === questId);
         if (!quest) return null;
 
-        const isDoneToday = q.lastCompletedDate === todayStr;
+        const isDoneToday = quest.lastCompletedDate === todayStr;
         const nextDate = isDoneToday ? null : todayStr;
 
         set({
