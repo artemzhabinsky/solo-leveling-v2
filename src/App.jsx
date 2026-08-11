@@ -28,7 +28,13 @@ export function App() {
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [cloudSyncState, setCloudSyncState] = useState('synced');
 
-  const { resetProgress } = usePlayerStore();
+  const { resetProgress, fixBalanceTo665, hasFixedBalance665 } = usePlayerStore();
+
+  useEffect(() => {
+    if (fixBalanceTo665 && !hasFixedBalance665) {
+      fixBalanceTo665();
+    }
+  }, []);
 
   // Automatic Background Supabase Cloud Sync Subscriptions & Status Listener
   useEffect(() => {

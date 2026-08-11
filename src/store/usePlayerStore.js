@@ -20,8 +20,8 @@ export const usePlayerStore = create()(
       name: 'Сон Джин-Ву',
       level: 1,
       xp: 0,
-      gold: 150,
-      totalGoldEarned: 150,
+      gold: 665,
+      totalGoldEarned: 665,
       hp: 3,
       hasShield: false,
       activeTitle: 'Пробуждённый',
@@ -32,6 +32,7 @@ export const usePlayerStore = create()(
       analyticsLogs: [],
       systemEvents: [],
       showDeathModal: false,
+      hasFixedBalance665: false,
 
       setName: (newName) => set({ name: newName }),
 
@@ -65,6 +66,10 @@ export const usePlayerStore = create()(
         if (!unlockedTitles.includes(titleStr)) {
           set({ unlockedTitles: [...unlockedTitles, titleStr] });
         }
+      },
+
+      fixBalanceTo665: () => {
+        set({ gold: 665, hasFixedBalance665: true });
       },
 
       // Automatic Daily HP Loss Penalty Check for Missed Days
@@ -278,8 +283,8 @@ export const usePlayerStore = create()(
         set({
           level: 1,
           xp: 0,
-          gold: 150,
-          totalGoldEarned: 150,
+          gold: 665,
+          totalGoldEarned: 665,
           hp: 3,
           hasShield: false,
           activeTitle: 'Пробуждённый',
@@ -292,13 +297,7 @@ export const usePlayerStore = create()(
       }
     }),
     {
-      name: 'SOLO_LEVELING_PLAYER_STORE_V2',
-      onRehydrateStorage: () => (state) => {
-        if (state && !state.hasDeductedSquatTestCoins) {
-          state.spendGold(60);
-          state.hasDeductedSquatTestCoins = true;
-        }
-      }
+      name: 'SOLO_LEVELING_PLAYER_STORE_V2'
     }
   )
 );
