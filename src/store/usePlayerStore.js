@@ -141,10 +141,11 @@ export const usePlayerStore = create()(
         let todayLog = existingLogs.find(l => l.date === todayStr);
 
         if (!todayLog) {
-          todayLog = { date: todayStr, xpGained: 0, tasksCompleted: 0, categoryBreakdown: {} };
+          todayLog = { date: todayStr, xpGained: 0, goldGained: 0, tasksCompleted: 0, categoryBreakdown: {} };
           existingLogs.push(todayLog);
         }
         todayLog.xpGained += finalXp;
+        todayLog.goldGained = (todayLog.goldGained || 0) + finalGold;
         todayLog.tasksCompleted += 1;
         todayLog.categoryBreakdown[categoryKey] = (todayLog.categoryBreakdown[categoryKey] || 0) + 1;
 
@@ -204,6 +205,7 @@ export const usePlayerStore = create()(
             return {
               ...l,
               xpGained: Math.max(0, l.xpGained - baseXp),
+              goldGained: Math.max(0, (l.goldGained || 0) - baseGold),
               tasksCompleted: Math.max(0, l.tasksCompleted - 1),
               categoryBreakdown: updatedBreakdown
             };

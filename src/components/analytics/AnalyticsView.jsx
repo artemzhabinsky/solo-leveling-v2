@@ -11,6 +11,7 @@ export function AnalyticsView() {
   const { inventory } = useShopStore();
 
   const [unlockedPopupAchievement, setUnlockedPopupAchievement] = useState(null);
+  const [chartMetric, setChartMetric] = useState('xp'); // 'xp' | 'gold'
 
   // 1. Radar Chart Axes Calculations (Default 0 everywhere if no tasks done)
   const maxAttrVal = Math.max(stats.strength, stats.intelligence, stats.vitality, stats.goldBonus, stats.sense, 1);
@@ -34,14 +35,14 @@ export function AnalyticsView() {
 
   const pointsString = `${getPoint(strPct, 0)} ${getPoint(intPct, 1)} ${getPoint(vitPct, 2)} ${getPoint(goldPct, 3)} ${getPoint(discPct, 4)}`;
 
-  // 2. 7-Day XP & Category Stats Calculations
+  // 2. 7-Day XP / Gold & Category Stats Calculations
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
     return d.toISOString().split('T')[0];
   });
 
-  const dailyXpData = last7Days.map(dateStr => {
+  const dailyHistoryData = last7Days.map(dateStr => {
     const log = analyticsLogs.find(l => l.date === dateStr);
     const dayName = new Date(dateStr).toLocaleDateString('ru-RU', { weekday: 'short' });
     const hasPenalty = systemEvents.some(ev => 
@@ -51,19 +52,24 @@ export function AnalyticsView() {
     return {
       date: dateStr,
       dayName: dayName.toUpperCase(),
-      xp: log ? log.xpGained : 0,
-      tasks: log ? log.tasksCompleted : 0,
+      xp: log ? (log.xpGained || 0) : 0,
+      gold: log ? (log.goldGained || 0) : 0,
+      tasks: log ? (log.tasksCompleted || 0) : 0,
       hasPenalty
     };
   });
 
-  const maxXp7Days = Math.max(...dailyXpData.map(d => d.xp), 100);
+  const maxVal7Days = Math.max(
+    ...dailyHistoryData.map(d => chartMetric === 'xp' ? d.xp : d.gold),
+    chartMetric === 'xp' ? 100 : 20
+  );
 
   // SVG Line Chart Coordinate Math
-  const linePoints = dailyXpData.map((d, i) => {
+  const linePoints = dailyHistoryData.map((d, i) => {
+    const val = chartMetric === 'xp' ? d.xp : d.gold;
     const x = 30 + i * 56.6;
-    const y = 95 - (d.xp / maxXp7Days) * 70;
-    return { x, y, ...d };
+    const y = 95 - (val / maxVal7Days) * 70;
+    return { x, y, val, ...d };
   });
 
   const polylineStr = linePoints.map(p => `${p.x},${p.y}`).join(' ');
@@ -101,7 +107,7 @@ export function AnalyticsView() {
       title: '⚡ Режим Гиперскорости',
       description: 'Выполнить 5 задач за один день.',
       rewardTitle: 'Бегущий по Молниям',
-      unlocked: dailyXpData.some(d => d.tasks >= 5)
+      unlocked: dailyHistoryData.some(d => d.tasks >= 5)
     },
     {
       id: 'ach-3',
@@ -144,6 +150,8 @@ export function AnalyticsView() {
     });
   }, [doneTasksCount, doneSTasksCount, dailyStreak, inventory.length, level]);
 
+  const activeColor = chartMetric === 'xp' ? '#00f0ff' : '#ffd700';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Top Banner Header */}
@@ -155,7 +163,7 @@ export function AnalyticsView() {
           АНАЛИТИКА И ДОСТИЖЕНИЯ
         </h1>
         <div style={{ fontSize: '13px', color: 'var(--text-dim)', marginTop: '2px' }}>
-          Распределение характеристик, графики набора опыта, штрафы и ачивки.
+          Распределение характеристик, графики набора опыта и монет, штрафы и ачивки.
         </div>
       </div>
 
@@ -223,59 +231,104 @@ export function AnalyticsView() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: 2 Cards (XP Line Chart + Category Donut Chart) */}
+        {/* RIGHT COLUMN: 2 Cards (XP/Gold Line Chart + Category Donut Chart) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          {/* TOP RIGHT CARD: Опыт за 7 дней с Графиком Линии и Красными Штрафами */}
+          {/* TOP RIGHT CARD: Опыт / Монеты за 7 дней с переключателем видов */}
           <div className="task-section-card-container" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
               <div>
-                <div style={{ fontSize: '11px', color: 'var(--system-blue)', fontWeight: 600 }}>ОПЫТ ЗА 7 ДНЕЙ</div>
-                <h3 className="font-orbitron" style={{ color: '#ffffff', fontSize: '16px', marginTop: '2px' }}>ДИНАМИКА НАБОРА XP</h3>
+                <div style={{ fontSize: '11px', color: chartMetric === 'xp' ? 'var(--system-blue)' : 'var(--system-gold)', fontWeight: 600, transition: 'color 0.3s ease' }}>
+                  {chartMetric === 'xp' ? 'ОПЫТ ЗА 7 ДНЕЙ' : 'МОНЕТЫ ЗА 7 ДНЕЙ'}
+                </div>
+                <h3 className="font-orbitron" style={{ color: '#ffffff', fontSize: '16px', marginTop: '2px' }}>
+                  {chartMetric === 'xp' ? 'ДИНАМИКА НАБОРА XP' : 'ДИНАМИКА ЗАРАБОТКА МОНЕТ'}
+                </h3>
               </div>
-              <span style={{ fontSize: '10px', color: 'var(--system-crimson)', border: '1px solid rgba(255, 42, 95, 0.4)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
-                ● КРАСНЫЕ ТОЧКИ = ШТРАФЫ
-              </span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {/* Metric Switcher Buttons */}
+                <div style={{ display: 'inline-flex', background: 'rgba(5, 10, 20, 0.8)', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '8px', padding: '2px' }}>
+                  <button
+                    onClick={() => setChartMetric('xp')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      background: chartMetric === 'xp' ? 'var(--system-blue)' : 'transparent',
+                      color: chartMetric === 'xp' ? '#050a15' : 'var(--text-muted)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    ⚡ Опыт
+                  </button>
+                  <button
+                    onClick={() => setChartMetric('gold')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      background: chartMetric === 'gold' ? 'var(--system-gold)' : 'transparent',
+                      color: chartMetric === 'gold' ? '#050a15' : 'var(--text-muted)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    🪙 Монеты
+                  </button>
+                </div>
+
+                {chartMetric === 'xp' && (
+                  <span style={{ fontSize: '10px', color: 'var(--system-crimson)', border: '1px solid rgba(255, 42, 95, 0.4)', padding: '2px 8px', borderRadius: '10px', fontWeight: 600 }}>
+                    ● КРАСНЫЕ ТОЧКИ = ШТРАФЫ
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Glowing SVG Line Chart */}
             <div style={{ position: 'relative', width: '100%', height: '160px', marginTop: '10px' }}>
               <svg width="100%" height="100%" viewBox="0 0 400 120" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
                 <defs>
-                  <linearGradient id="xpAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00f0ff" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#00f0ff" stopOpacity="0.0" />
+                  <linearGradient id="metricAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={activeColor} stopOpacity="0.3" />
+                    <stop offset="100%" stopColor={activeColor} stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
 
                 {/* Horizontal Grid Lines */}
-                <line x1="20" y1="25" x2="380" y2="25" stroke="rgba(0, 240, 255, 0.1)" strokeDasharray="3 3" />
-                <line x1="20" y1="60" x2="380" y2="60" stroke="rgba(0, 240, 255, 0.1)" strokeDasharray="3 3" />
-                <line x1="20" y1="95" x2="380" y2="95" stroke="rgba(0, 240, 255, 0.1)" />
+                <line x1="20" y1="25" x2="380" y2="25" stroke="rgba(255, 255, 255, 0.08)" strokeDasharray="3 3" />
+                <line x1="20" y1="60" x2="380" y2="60" stroke="rgba(255, 255, 255, 0.08)" strokeDasharray="3 3" />
+                <line x1="20" y1="95" x2="380" y2="95" stroke="rgba(255, 255, 255, 0.12)" />
 
                 {/* Filled Gradient Area */}
-                <polygon points={areaPolygonStr} fill="url(#xpAreaGrad)" />
+                <polygon points={areaPolygonStr} fill="url(#metricAreaGrad)" />
 
-                {/* Main Glowing XP Line */}
-                <polyline points={polylineStr} fill="none" stroke="#00f0ff" strokeWidth="2.5" style={{ filter: 'drop-shadow(0 0 6px #00f0ff)' }} />
+                {/* Main Glowing Metric Line */}
+                <polyline points={polylineStr} fill="none" stroke={activeColor} strokeWidth="2.5" style={{ filter: `drop-shadow(0 0 6px ${activeColor})` }} />
 
                 {/* Data Points & Values */}
                 {linePoints.map((pt, idx) => (
                   <g key={idx}>
-                    {/* XP Number Label above node */}
-                    <text x={pt.x} y={pt.y - 10} fill={pt.xp > 0 ? '#00f0ff' : 'var(--text-dim)'} fontSize="11" fontWeight="700" textAnchor="middle">
-                      {pt.xp}
+                    {/* Value Number Label above node */}
+                    <text x={pt.x} y={pt.y - 10} fill={pt.val > 0 ? activeColor : 'var(--text-dim)'} fontSize="11" fontWeight="700" textAnchor="middle">
+                      {chartMetric === 'gold' && pt.val > 0 ? `+${pt.val}` : pt.val}
                     </text>
 
                     {/* Point Circle */}
                     <circle
                       cx={pt.x}
                       cy={pt.y}
-                      r={pt.hasPenalty ? "6" : "4"}
-                      fill={pt.hasPenalty ? "#ff2a5f" : "#00f0ff"}
+                      r={chartMetric === 'xp' && pt.hasPenalty ? "6" : "4"}
+                      fill={chartMetric === 'xp' && pt.hasPenalty ? "#ff2a5f" : activeColor}
                       stroke="#050a15"
                       strokeWidth="2"
-                      style={{ filter: pt.hasPenalty ? 'drop-shadow(0 0 8px #ff2a5f)' : 'drop-shadow(0 0 6px #00f0ff)' }}
+                      style={{ filter: (chartMetric === 'xp' && pt.hasPenalty) ? 'drop-shadow(0 0 8px #ff2a5f)' : `drop-shadow(0 0 6px ${activeColor})` }}
                     />
 
                     {/* Day Label at bottom */}
