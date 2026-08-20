@@ -52,10 +52,12 @@ export function DailyQuestsPanel({ onShowLevelUp }) {
         if (rewardResult.leveledUp) {
           onShowLevelUp(rewardResult);
         }
+        updateStreakOnDailyQuestComplete(useDailyQuestStore.getState().quests);
       } else {
         const earnedXp = result.quest.lastEarnedXp || result.quest.xp;
         const earnedGold = result.quest.lastEarnedGold || result.quest.coins;
         revertXpAndGold(earnedXp, earnedGold, 'physical');
+        revertStreakIfUncompleted();
       }
     }
   };

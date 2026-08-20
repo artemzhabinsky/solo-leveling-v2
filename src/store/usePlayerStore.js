@@ -120,9 +120,35 @@ export const usePlayerStore = create()(
             // Deduct HP for missed days
             const penaltyHp = Math.min(3, diffDays);
             get().deductHp(penaltyHp);
+            if (!state.hasShield) {
+              set({ dailyStreak: 0 });
+            }
           }
 
           set({ lastHpCheckDate: todayStr });
+        }
+      },
+
+      updateStreakOnDailyQuestComplete: (quests = []) => {
+        const state = get();
+        const todayStr = getLocalDateStr();
+        const allCompletedToday = quests.length > 0 && quests.every(q => q.lastCompletedDate === todayStr);
+        if (allCompletedToday && state.lastStreakDate !== todayStr) {
+          set({
+            dailyStreak: state.dailyStreak + 1,
+            lastStreakDate: todayStr
+          });
+        }
+      },
+
+      revertStreakIfUncompleted: () => {
+        const state = get();
+        const todayStr = getLocalDateStr();
+        if (state.lastStreakDate === todayStr) {
+          set({
+            dailyStreak: Math.max(0, state.dailyStreak - 1),
+            lastStreakDate: null
+          });
         }
       },
 
